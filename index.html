@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central Financiera - Dashboard Ejecutivo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #ff6b35 0%, #ffa366 25%, #ffffff 60%, #fff8f0 85%, #ff6b35 100%);
+            min-height: 100vh;
+            color: #1a202c;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 25px 50px rgba(255, 107, 53, 0.15);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #ff6b35, #ffa366, #ff8c42, #ffb366);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b35, #ffa366);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3);
+        }
+
+        .header-title h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b35, #e55a2b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .quick-stat {
+            text-align: center;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 107, 53, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .quick-stat-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #ff6b35;
+        }
+
+        .quick-stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+        }
+
+        /* Tab Navigation */
+        .tab-navigation {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 0.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255, 107, 53, 0.1);
+            color: #ff6b35;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff6b35, #ffa366);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+        }
+
+        .tab-icon {
+            font-size: 1.1rem;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grid Layouts */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .charts-main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .financial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .cooperativas-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(255, 107, 53, 0.2);
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            position: relative;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(255, 107, 53, 0.2);
+        }
+
+        .kpi-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #ff6b35;
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-label {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+        }
+
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .trend-up { color: #10b981; }
+        .trend-down { color: #ef4444; }
+
+        /* Chart Styles */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .chart-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .control-btn {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(135deg, #ff6b35, #ffa366);
+            color: white;
+            border-color: #ff6b35;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+        }
+
+        .large-chart {
+            height: 450px;
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #ff6b35, #ffa366);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(255, 107, 53, 0.05);
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #ff6b35, #ffa366);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+            background: rgba(255, 107, 53, 0.05);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.75rem;
+            top: 1.5rem;
+            width: 14px;
+            height: 14px;
+            background: #ff6b35;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 3px #ff6b35;
+        }
+
+        .timeline-date {
+            font-size: 0.85rem;
+            color: #ff6b35;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: linear-gradient(135deg, #ff6b35, #ffa366);
+            color: white;
+            border-radius: 16px;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .summary-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -25%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .summary-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .overview-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cooperativas-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .financial-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .tab-navigation {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                min-width: auto;
+            }
+            
+            .kpis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #ff6b35;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">CF</div>
+                    <div>
+                        <h1>Desembolso vs Gasto</h1>
+                        <p class="header-subtitle">Julio 2025</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="quick-stat">
+                        <div class="quick-stat-value">Q15.9M</div>
+                        <div class="quick-stat-label">Desembolsado</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value">66</div>
+                        <div class="quick-stat-label">Casos</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value">6</div>
+                        <div class="quick-stat-label">Sucursales</div>
+                    </div>
+                    <div class="quick-stat">
+                        <div class="quick-stat-value">Jul 2025</div>
+                        <div class="quick-stat-label">Período</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-navigation">
+            <button class="tab-btn active" data-tab="overview">
+                <span class="tab-icon">📊</span>
+                Resumen General
+            </button>
+            <button class="tab-btn" data-tab="sucursales">
+                <span class="tab-icon">🏢</span>
+                Por Sucursales
+            </button>
+            <button class="tab-btn" data-tab="tipos">
+                <span class="tab-icon">💼</span>
+                Tipos de Caso
+            </button>
+            <button class="tab-btn" data-tab="medios">
+                <span class="tab-icon">📱</span>
+                Medios de Contacto
+            </button>
+            <button class="tab-btn" data-tab="detalle">
+                <span class="tab-icon">📋</span>
+                Reporte Detallado
+            </button>
+        </div>
+
+        <!-- Tab Contents -->
+        
+        <!-- Overview Tab -->
+        <div class="tab-content active" id="overview">
+            <div class="overview-grid">
+                <div class="kpis-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">💰</div>
+                        <div class="kpi-value">Q15.9M</div>
+                        <div class="kpi-label">Total Desembolsado</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #67e8f9);">🎯</div>
+                        <div class="kpi-value">66</div>
+                        <div class="kpi-label">Total de Casos</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">🏢</div>
+                        <div class="kpi-value">6</div>
+                        <div class="kpi-label">Sucursales Activas</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">📈</div>
+                        <div class="kpi-value">Q241K</div>
+                        <div class="kpi-label">Promedio por Caso</div>
+                    </div>
+                </div>
+
+                <div class="charts-main">
+                    <div class="card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Distribución por Sucursal</h3>
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="overviewChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-box">
+                    <h3 class="summary-title">📊 Resumen Julio 2025</h3>
+                    <div class="summary-item">
+                        <span>Casos Nuevos</span>
+                        <strong>44 (66.7%)</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Ampliaciones</span>
+                        <strong>22 (33.3%)</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Sucursal Líder</span>
+                        <strong>CENTRAL</strong>
+                    </div>
+                    <div class="summary-item">
+                        <span>Mayor Promedio</span>
+                        <strong>PETÉN (Q394K)</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sucursales Tab -->
+        <div class="tab-content" id="sucursales">
+            <div class="cooperativas-grid">
+                <div class="card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Distribución de Montos</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="sucursalesDonut"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Casos por Sucursal</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="casosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <div class="chart-header">
+                    <h3 class="chart-title">Comparativo por Sucursal</h3>
+                </div>
+                <div class="chart-wrapper large-chart">
+                    <canvas id="comparativoChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tipos Tab -->
+        <div class="tab-content" id="tipos">
+            <div class="financial-grid">
+                <div class="card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Distribución por Tipo</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="tiposChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Montos por Tipo</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="montosTiposChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3 class="chart-title">📊 Análisis por Tipo de Caso</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Casos</th>
+                            <th>% de Casos</th>
+                            <th>Monto Total</th>
+                            <th>% de Monto</th>
+                            <th>Promedio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>NUEVO</strong></td>
+                            <td>44</td>
+                            <td>66.7%</td>
+                            <td>Q12.500.000</td>
+                            <td>78.5%</td>
+                            <td>Q284.091</td>
+                        </tr>
+                        <tr>
+                            <td><strong>AMPLIACION</strong></td>
+                            <td>22</td>
+                            <td>33.3%</td>
+                            <td>Q3.424.000</td>
+                            <td>21.5%</td>
+                            <td>Q155.636</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Medios Tab -->
+        <div class="tab-content" id="medios">
+            <div class="financial-grid">
+                <div class="card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Casos por Medio de Contacto</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="mediosChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Efectividad por Medio</h3>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="efectividadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 2rem;">
+                <h3 class="chart-title">📱 Análisis por Medio de Contacto</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Medio</th>
+                            <th>Casos</th>
+                            <th>% de Casos</th>
+                            <th>Monto Promedio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SOCIAL MANAGER</strong></td>
+                            <td>45</td>
+                            <td>68.2%</td>
+                            <td>Q245.000</td>
+                            <td><span class="status-badge status-active">Principal</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>VISITO OFICINA/AGENCIA</strong></td>
+                            <td>15</td>
+                            <td>22.7%</td>
+                            <td>Q220.000</td>
+                            <td><span class="status-badge status-active">Activo</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>CORREO ELECTRÓNICO</strong></td>
+                            <td>4</td>
+                            <td>6.1%</td>
+                            <td>Q187.500</td>
+                            <td><span class="status-badge status-pending">Menor</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>OTROS</strong></td>
+                            <td>2</td>
+                            <td>3.0%</td>
+                            <td>Q150.000</td>
+                            <td><span class="status-badge status-completed">Esporádico</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Detalle Tab -->
+        <div class="tab-content" id="detalle">
+            <div class="card">
+                <div class="chart-header">
+                    <h3 class="chart-title">📊 Reporte Completo por Sucursal - Julio 2025</h3>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Sucursal</th>
+                            <th>Casos Totales</th>
+                            <th>Casos Nuevos</th>
+                            <th>Ampliaciones</th>
+                            <th>Monto Total</th>
+                            <th>% del Total</th>
+                            <th>Promedio/Caso</th>
+                            <th>Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CENTRAL</strong></td>
+                            <td>33</td>
+                            <td>22</td>
+                            <td>11</td>
+                            <td>Q9.574.000</td>
+                            <td>60.1%</td>
+                            <td>Q290.121</td>
+                            <td><span class="status-badge status-active">Líder</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>PETÉN</strong></td>
+                            <td>7</td>
+                            <td>5</td>
+                            <td>2</td>
+                            <td>Q2.760.000</td>
+                            <td>17.3%</td>
+                            <td>Q394.286</td>
+                            <td><span class="status-badge status-active">Alto Valor</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>ESCUINTLA</strong></td>
+                            <td>11</td>
+                            <td>8</td>
+                            <td>3</td>
+                            <td>Q1.940.000</td>
+                            <td>12.2%</td>
+                            <td>Q176.364</td>
+                            <td><span class="status-badge status-active">Estable</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>COBÁN</strong></td>
+                            <td>8</td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>Q780.000</td>
+                            <td>4.9%</td>
+                            <td>Q97.500</td>
+                            <td><span class="status-badge status-pending">Crecimiento</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>MAZATENANGO</strong></td>
+                            <td>5</td>
+                            <td>3</td>
+                            <td>2</td>
+                            <td>Q670.000</td>
+                            <td>4.2%</td>
+                            <td>Q134.000</td>
+                            <td><span class="status-badge status-active">Potencial</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>4 CAMINOS</strong></td>
+                            <td>2</td>
+                            <td>1</td>
+                            <td>1</td>
+                            <td>Q200.000</td>
+                            <td>1.3%</td>
+                            <td>Q100.000</td>
+                            <td><span class="status-badge status-completed">Nuevo</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="financial-grid" style="margin-top: 2rem;">
+                <div class="card">
+                    <h3 class="chart-title">📈 Ranking por Volumen</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="rankingChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="chart-title">🎯 Resumen General</h3>
+                    <div style="padding: 1rem 0;">
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>CENTRAL - Participación</span>
+                                <strong>60.1%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="width: 60.1%; height: 100%; background: linear-gradient(90deg, #ff6b35, #ffa366);"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Casos Nuevos</span>
+                                <strong>66.7%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="width: 66.7%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                <span>Social Manager</span>
+                                <strong>68.2%</strong>
+                            </div>
+                            <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="width: 68.2%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const targetTab = this.dataset.tab;
+                
+                // Update tab buttons
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Update tab content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                document.getElementById(targetTab).classList.add('active');
+                
+                // Initialize charts for the active tab with delay
+                setTimeout(() => {
+                    try {
+                        initializeChartsForTab(targetTab);
+                    } catch (error) {
+                        console.log('Chart initialization error:', error);
+                    }
+                }, 200);
+            });
+        });
+
+        // Chart configurations
+        const brandColors = {
+            primary: '#ff6b35',
+            secondary: '#ffa366',
+            accent: '#ff8c42',
+            success: '#10b981',
+            warning: '#f59e0b',
+            error: '#ef4444',
+            info: '#06b6d4'
+        };
+
+        // Datos reales del Excel - Julio 2025
+        const sucursalesData = {
+            labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+            desembolsos: [9.574, 2.760, 1.940, 0.780, 0.670, 0.200],
+            casos: [33, 7, 11, 8, 5, 2]
+        };
+
+        const tiposData = {
+            labels: ['NUEVO', 'AMPLIACION'],
+            casos: [44, 22],
+            montos: [12.5, 3.424]
+        };
+
+        const mediosData = {
+            labels: ['SOCIAL MANAGER', 'VISITO OFICINA', 'CORREO ELECTRÓNICO', 'OTROS'],
+            casos: [45, 15, 4, 2],
+            efectividad: [245, 220, 187.5, 150]
+        };
+
+        // Chart initialization functions
+        function initializeChartsForTab(tab) {
+            try {
+                switch(tab) {
+                    case 'overview':
+                        initOverviewChart();
+                        break;
+                    case 'sucursales':
+                        initSucursalesDonut();
+                        initCasosChart();
+                        initComparativoChart();
+                        break;
+                    case 'tipos':
+                        initTiposChart();
+                        initMontosTiposChart();
+                        break;
+                    case 'medios':
+                        initMediosChart();
+                        initEfectividadChart();
+                        break;
+                    case 'detalle':
+                        initRankingChart();
+                        break;
+                }
+            } catch (error) {
+                console.log('Error in chart initialization:', error);
+            }
+        }
+
+        function initOverviewChart() {
+            const ctx = document.getElementById('overviewChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: sucursalesData.labels,
+                        datasets: [{
+                            data: sucursalesData.desembolsos,
+                            backgroundColor: [
+                                '#ff6b35', '#ffa366', '#ff8c42', 
+                                '#ffb366', '#ff9f59', '#ffcc99'
+                            ],
+                            borderWidth: 4,
+                            borderColor: '#fff',
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { 
+                                    padding: 15, 
+                                    font: { size: 11 }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return `${context.label}: Q${context.parsed}M (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating overview chart:', error);
+            }
+        }
+
+        function initSucursalesDonut() {
+            const ctx = document.getElementById('sucursalesDonut');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: sucursalesData.labels,
+                        datasets: [{
+                            data: sucursalesData.desembolsos,
+                            backgroundColor: [
+                                '#ff6b35', '#ffa366', '#ff8c42', 
+                                '#ffb366', '#ff9f59', '#ffcc99'
+                            ],
+                            borderWidth: 4,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '50%',
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating sucursales chart:', error);
+            }
+        }
+
+        function initCasosChart() {
+            const ctx = document.getElementById('casosChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sucursalesData.labels,
+                        datasets: [{
+                            label: 'Casos',
+                            data: sucursalesData.casos,
+                            backgroundColor: brandColors.info + '80',
+                            borderColor: brandColors.info,
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating casos chart:', error);
+            }
+        }
+
+        function initComparativoChart() {
+            const ctx = document.getElementById('comparativoChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sucursalesData.labels,
+                        datasets: [{
+                            label: 'Casos',
+                            data: sucursalesData.casos,
+                            backgroundColor: brandColors.primary + '60',
+                            borderColor: brandColors.primary,
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating comparativo chart:', error);
+            }
+        }
+
+        function initTiposChart() {
+            const ctx = document.getElementById('tiposChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: tiposData.labels,
+                        datasets: [{
+                            data: tiposData.casos,
+                            backgroundColor: [brandColors.success, brandColors.warning],
+                            borderWidth: 4,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating tipos chart:', error);
+            }
+        }
+
+        function initMontosTiposChart() {
+            const ctx = document.getElementById('montosTiposChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: tiposData.labels,
+                        datasets: [{
+                            label: 'Monto (M)',
+                            data: tiposData.montos,
+                            backgroundColor: [brandColors.success + '80', brandColors.warning + '80'],
+                            borderColor: [brandColors.success, brandColors.warning],
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Q' + value + 'M';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating montos tipos chart:', error);
+            }
+        }
+
+        function initMediosChart() {
+            const ctx = document.getElementById('mediosChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: mediosData.labels,
+                        datasets: [{
+                            data: mediosData.casos,
+                            backgroundColor: [
+                                brandColors.primary, brandColors.info, 
+                                brandColors.success, brandColors.accent
+                            ],
+                            borderWidth: 4,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '50%',
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating medios chart:', error);
+            }
+        }
+
+        function initEfectividadChart() {
+            const ctx = document.getElementById('efectividadChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: mediosData.labels,
+                        datasets: [{
+                            label: 'Promedio (Miles)',
+                            data: mediosData.efectividad,
+                            backgroundColor: brandColors.info + '80',
+                            borderColor: brandColors.info,
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Q' + value + 'K';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating efectividad chart:', error);
+            }
+        }
+
+        function initRankingChart() {
+            const ctx = document.getElementById('rankingChart');
+            if (!ctx) return;
+            
+            try {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sucursalesData.labels,
+                        datasets: [{
+                            label: 'Montos (M)',
+                            data: sucursalesData.desembolsos,
+                            backgroundColor: brandColors.primary + '80',
+                            borderColor: brandColors.primary,
+                            borderWidth: 2,
+                            borderRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'Q' + value + 'M';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.log('Error creating ranking chart:', error);
+            }
+        }
+
+        // Initialize default charts
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                setTimeout(() => {
+                    initOverviewChart();
+                }, 500);
+                
+                // Add entrance animations
+                const cards = document.querySelectorAll('.card, .kpi-card');
+                cards.forEach((card, index) => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.6s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            } catch (error) {
+                console.log('Initialization error:', error);
+            }
+        });
+
+        // Control button functionality
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                try {
+                    const parent = this.closest('.chart-controls');
+                    if (parent) {
+                        parent.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                } catch (error) {
+                    console.log('Control button error:', error);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
