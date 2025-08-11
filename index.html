@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard </title>
+    <title>Dashboard - Desembolsos vs Gastos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         * {
@@ -24,6 +24,47 @@
             max-width: 1600px;
             margin: 0 auto;
             padding: 1rem;
+        }
+
+        /* Month Selector Styles */
+        .month-selector {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 15px 35px rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.2);
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .month-btn {
+            padding: 0.75rem 2rem;
+            border: 2px solid rgba(255, 107, 53, 0.3);
+            border-radius: 12px;
+            background: rgba(255, 107, 53, 0.1);
+            color: #64748b;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .month-btn:hover {
+            background: rgba(255, 107, 53, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .month-btn.active {
+            background: linear-gradient(135deg, #ff6b35, #ffa366);
+            color: white;
+            border-color: #ff6b35;
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
 
         /* Header Styles */
@@ -204,13 +245,6 @@
             gap: 2rem;
         }
 
-        .cooperativas-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
         /* Card Styles */
         .card {
             background: rgba(255, 255, 255, 0.95);
@@ -270,18 +304,6 @@
             margin-bottom: 0.75rem;
         }
 
-        .kpi-trend {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.25rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-        }
-
-        .trend-up { color: #10b981; }
-        .trend-down { color: #ef4444; }
-
         /* Chart Styles */
         .chart-header {
             display: flex;
@@ -296,40 +318,9 @@
             color: #1a202c;
         }
 
-        .chart-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .control-btn {
-            padding: 0.5rem 1rem;
-            background: rgba(255, 107, 53, 0.1);
-            border: 1px solid rgba(255, 107, 53, 0.3);
-            border-radius: 8px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        .control-btn:hover {
-            background: rgba(255, 107, 53, 0.2);
-        }
-
-        .control-btn.active {
-            background: linear-gradient(135deg, #ff6b35, #ffa366);
-            color: white;
-            border-color: #ff6b35;
-        }
-
         .chart-wrapper {
             position: relative;
             height: 350px;
-        }
-
-        .large-chart {
-            height: 450px;
         }
 
         /* Table Styles */
@@ -380,63 +371,6 @@
             color: #1e40af;
         }
 
-        /* Timeline Styles */
-        .timeline {
-            position: relative;
-            padding-left: 2rem;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 1rem;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(to bottom, #ff6b35, #ffa366);
-            border-radius: 2px;
-        }
-
-        .timeline-item {
-            position: relative;
-            margin-bottom: 2rem;
-            background: rgba(255, 107, 53, 0.05);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid #ff6b35;
-        }
-
-        .timeline-item::before {
-            content: '';
-            position: absolute;
-            left: -2.75rem;
-            top: 1.5rem;
-            width: 14px;
-            height: 14px;
-            background: #ff6b35;
-            border-radius: 50%;
-            border: 4px solid white;
-            box-shadow: 0 0 0 3px #ff6b35;
-        }
-
-        .timeline-date {
-            font-size: 0.85rem;
-            color: #ff6b35;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-title {
-            font-weight: 600;
-            color: #1a202c;
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-desc {
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
         /* Summary Box */
         .summary-box {
             background: linear-gradient(135deg, #ff6b35, #ffa366);
@@ -485,10 +419,6 @@
                 grid-template-columns: 1fr;
             }
             
-            .cooperativas-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .financial-grid {
                 grid-template-columns: 1fr;
             }
@@ -516,33 +446,27 @@
             .kpis-grid {
                 grid-template-columns: 1fr;
             }
-        }
 
-        /* Loading Animation */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #ff6b35;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            .month-selector {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="dashboard-container">
+        <!-- Month Selector -->
+        <div class="month-selector">
+            <button class="month-btn" data-month="junio">
+                <span>📅</span>
+                Junio 2025
+            </button>
+            <button class="month-btn active" data-month="julio">
+                <span>📅</span>
+                Julio 2025
+            </button>
+        </div>
+
         <!-- Header -->
         <div class="header">
             <div class="header-content">
@@ -550,24 +474,24 @@
                     <div class="logo">CF</div>
                     <div>
                         <h1>Desembolso vs lo gastado </h1>
-                        <p class="header-subtitle"> Julio 2025</p>
+                        <p class="header-subtitle" id="current-month">Julio 2025</p>
                     </div>
                 </div>
                 <div class="header-stats">
                     <div class="quick-stat">
-                        <div class="quick-stat-value">Q8.2M</div>
+                        <div class="quick-stat-value" id="stat-desembolsado">Q8.2M</div>
                         <div class="quick-stat-label">Desembolsado</div>
                     </div>
                     <div class="quick-stat">
-                        <div class="quick-stat-value">60</div>
+                        <div class="quick-stat-value" id="stat-casos">60</div>
                         <div class="quick-stat-label">Casos</div>
                     </div>
                     <div class="quick-stat">
-                        <div class="quick-stat-value">Q302K</div>
+                        <div class="quick-stat-value" id="stat-inversion">Q302K</div>
                         <div class="quick-stat-label">Inversión Pauta</div>
                     </div>
                     <div class="quick-stat">
-                        <div class="quick-stat-value">27.2X</div>
+                        <div class="quick-stat-value" id="stat-retorno">27.2X</div>
                         <div class="quick-stat-label">Retorno</div>
                     </div>
                 </div>
@@ -606,22 +530,22 @@
                 <div class="kpis-grid">
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">💰</div>
-                        <div class="kpi-value">Q8.2M</div>
+                        <div class="kpi-value" id="kpi-desembolsado">Q8.2M</div>
                         <div class="kpi-label">Total Desembolsado</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #67e8f9);">🎯</div>
-                        <div class="kpi-value">60</div>
+                        <div class="kpi-value" id="kpi-casos">60</div>
                         <div class="kpi-label">Total de Casos</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">🏢</div>
-                        <div class="kpi-value">6</div>
+                        <div class="kpi-value" id="kpi-sucursales">6</div>
                         <div class="kpi-label">Sucursales Activas</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">📈</div>
-                        <div class="kpi-value">Q137K</div>
+                        <div class="kpi-value" id="kpi-promedio">Q137K</div>
                         <div class="kpi-label">Promedio por Caso</div>
                     </div>
                 </div>
@@ -638,22 +562,22 @@
                 </div>
 
                 <div class="summary-box">
-                    <h3 class="summary-title">📊 Resumen Julio 2025</h3>
+                    <h3 class="summary-title" id="summary-title">📊 Resumen Julio 2025</h3>
                     <div class="summary-item">
                         <span>Casos Nuevos</span>
-                        <strong>40 (66.7%)</strong>
+                        <strong id="summary-nuevos">40 (66.7%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Ampliaciones</span>
-                        <strong>20 (33.3%)</strong>
+                        <strong id="summary-ampliaciones">20 (33.3%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Retorno de Pauta</span>
-                        <strong>27.2X</strong>
+                        <strong id="summary-retorno">27.2X</strong>
                     </div>
                     <div class="summary-item">
                         <span>Mejor Eficiencia</span>
-                        <strong>PETÉN (48.8X)</strong>
+                        <strong id="summary-mejor">PETÉN (48.8X)</strong>
                     </div>
                 </div>
             </div>
@@ -665,22 +589,22 @@
                 <div class="kpis-grid">
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">⚡</div>
-                        <div class="kpi-value">27.2X</div>
+                        <div class="kpi-value" id="kpi-eficiencia-retorno">27.2X</div>
                         <div class="kpi-label">Retorno por Q1</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">💸</div>
-                        <div class="kpi-value">Q302K</div>
+                        <div class="kpi-value" id="kpi-eficiencia-inversion">Q302K</div>
                         <div class="kpi-label">Total Inversión Pauta</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">🎯</div>
-                        <div class="kpi-value">Q5.0K</div>
+                        <div class="kpi-value" id="kpi-eficiencia-costo">Q5.0K</div>
                         <div class="kpi-label">Costo por Cliente</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">📈</div>
-                        <div class="kpi-value">18.9%</div>
+                        <div class="kpi-value" id="kpi-eficiencia-conversion">18.9%</div>
                         <div class="kpi-label">Tasa de Conversión</div>
                     </div>
                 </div>
@@ -700,19 +624,19 @@
                     <h3 class="summary-title">⚡ Eficiencia Total</h3>
                     <div class="summary-item">
                         <span>Inversión en Pauta</span>
-                        <strong>Q301,607</strong>
+                        <strong id="eficiencia-summary-inversion">Q301,607</strong>
                     </div>
                     <div class="summary-item">
                         <span>Desembolsos Generados</span>
-                        <strong>Q8,200,000</strong>
+                        <strong id="eficiencia-summary-desembolsos">Q8,200,000</strong>
                     </div>
                     <div class="summary-item">
                         <span>Ganancia Neta</span>
-                        <strong>Q7,898,393</strong>
+                        <strong id="eficiencia-summary-ganancia">Q7,898,393</strong>
                     </div>
                     <div class="summary-item">
                         <span>Eficiencia</span>
-                        <strong>Cada Q1 → Q27.19</strong>
+                        <strong id="eficiencia-summary-ratio">Cada Q1 → Q27.19</strong>
                     </div>
                 </div>
             </div>
@@ -739,81 +663,8 @@
 
             <div class="card" style="margin-top: 2rem;">
                 <h3 class="chart-title">⚡ Análisis de Eficiencia por Sucursal</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Sucursal</th>
-                            <th>Inversión Pauta</th>
-                            <th>Desembolsos</th>
-                            <th>Retorno por Q1</th>
-                            <th>Costo/Cliente</th>
-                            <th>Casos</th>
-                            <th>Eficiencia</th>
-                            <th>Calificación</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>PETÉN</strong></td>
-                            <td>Q28.280</td>
-                            <td>Q1.380.000</td>
-                            <td>Q48.82</td>
-                            <td>Q4.713</td>
-                            <td>6</td>
-                            <td>4,882%</td>
-                            <td><span class="status-badge status-active">Excelente</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>ESCUINTLA</strong></td>
-                            <td>Q30.335</td>
-                            <td>Q970.000</td>
-                            <td>Q31.97</td>
-                            <td>Q3.034</td>
-                            <td>10</td>
-                            <td>3,197%</td>
-                            <td><span class="status-badge status-active">Muy Buena</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>CENTRAL</strong></td>
-                            <td>Q157.289</td>
-                            <td>Q4.930.000</td>
-                            <td>Q31.35</td>
-                            <td>Q5.617</td>
-                            <td>28</td>
-                            <td>3,135%</td>
-                            <td><span class="status-badge status-active">Muy Buena</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>COBÁN</strong></td>
-                            <td>Q31.448</td>
-                            <td>Q390.000</td>
-                            <td>Q12.40</td>
-                            <td>Q4.493</td>
-                            <td>7</td>
-                            <td>1,240%</td>
-                            <td><span class="status-badge status-pending">Buena</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>MAZATENANGO</strong></td>
-                            <td>Q28.169</td>
-                            <td>Q335.000</td>
-                            <td>Q11.89</td>
-                            <td>Q7.042</td>
-                            <td>4</td>
-                            <td>1,189%</td>
-                            <td><span class="status-badge status-pending">Buena</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>4 CAMINOS</strong></td>
-                            <td>Q26.086</td>
-                            <td>Q200.000</td>
-                            <td>Q7.67</td>
-                            <td>Q13.043</td>
-                            <td>2</td>
-                            <td>767%</td>
-                            <td><span class="status-badge status-completed">En Desarrollo</span></td>
-                        </tr>
-                    </tbody>
+                <table class="data-table" id="eficiencia-table">
+                    <!-- Dynamic content -->
                 </table>
             </div>
         </div>
@@ -824,22 +675,22 @@
                 <div class="kpis-grid">
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">🌎</div>
-                        <div class="kpi-value">6</div>
+                        <div class="kpi-value" id="geo-regiones">6</div>
                         <div class="kpi-label">Regiones Activas</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #ff6b35, #ffa366);">🏆</div>
-                        <div class="kpi-value">CENTRAL</div>
+                        <div class="kpi-value" id="geo-lider">CENTRAL</div>
                         <div class="kpi-label">Región Líder</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">📍</div>
-                        <div class="kpi-value">PETÉN</div>
+                        <div class="kpi-value" id="geo-eficiencia">PETÉN</div>
                         <div class="kpi-label">Mayor Eficiencia</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #67e8f9);">🚀</div>
-                        <div class="kpi-value">4 CAMINOS</div>
+                        <div class="kpi-value" id="geo-potencial">4 CAMINOS</div>
                         <div class="kpi-label">Potencial</div>
                     </div>
                 </div>
@@ -859,19 +710,19 @@
                     <h3 class="summary-title">🗺️ Cobertura Nacional</h3>
                     <div class="summary-item">
                         <span>Región Central</span>
-                        <strong>Q4.93M (60.1%)</strong>
+                        <strong id="geo-summary-central">Q4.93M (60.1%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Región Norte</span>
-                        <strong>Q1.77M (21.6%)</strong>
+                        <strong id="geo-summary-norte">Q1.77M (21.6%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Región Sur</span>
-                        <strong>Q1.31M (16.0%)</strong>
+                        <strong id="geo-summary-sur">Q1.31M (16.0%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Región Occidente</span>
-                        <strong>Q200K (2.4%)</strong>
+                        <strong id="geo-summary-occidente">Q200K (2.4%)</strong>
                     </div>
                 </div>
             </div>
@@ -895,79 +746,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3 class="chart-title">🗺️ Análisis Geográfico Detallado</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Región/Sucursal</th>
-                            <th>Ubicación</th>
-                            <th>Población Objetivo</th>
-                            <th>Casos</th>
-                            <th>Penetración</th>
-                            <th>Desembolsos</th>
-                            <th>Oportunidad</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>CENTRAL</strong></td>
-                            <td>Ciudad Capital</td>
-                            <td>~2.5M hab</td>
-                            <td>28</td>
-                            <td>0.001%</td>
-                            <td>Q4.930.000</td>
-                            <td><span class="status-badge status-active">Alta</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>PETÉN</strong></td>
-                            <td>Norte</td>
-                            <td>~700K hab</td>
-                            <td>6</td>
-                            <td>0.0009%</td>
-                            <td>Q1.380.000</td>
-                            <td><span class="status-badge status-active">Muy Alta</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>ESCUINTLA</strong></td>
-                            <td>Sur Costa</td>
-                            <td>~800K hab</td>
-                            <td>10</td>
-                            <td>0.0013%</td>
-                            <td>Q970.000</td>
-                            <td><span class="status-badge status-active">Alta</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>COBÁN</strong></td>
-                            <td>Norte Central</td>
-                            <td>~300K hab</td>
-                            <td>7</td>
-                            <td>0.0023%</td>
-                            <td>Q390.000</td>
-                            <td><span class="status-badge status-pending">Media</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>MAZATENANGO</strong></td>
-                            <td>Sur Occidente</td>
-                            <td>~400K hab</td>
-                            <td>4</td>
-                            <td>0.001%</td>
-                            <td>Q335.000</td>
-                            <td><span class="status-badge status-pending">Media</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>4 CAMINOS</strong></td>
-                            <td>Occidente</td>
-                            <td>~500K hab</td>
-                            <td>2</td>
-                            <td>0.0004%</td>
-                            <td>Q200.000</td>
-                            <td><span class="status-badge status-completed">Muy Alta</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
 
         <!-- Clientes Tab -->
@@ -976,22 +754,22 @@
                 <div class="kpis-grid">
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">👥</div>
-                        <div class="kpi-value">60</div>
+                        <div class="kpi-value" id="clientes-unicos">60</div>
                         <div class="kpi-label">Clientes Únicos</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #ff6b35, #ffa366);">📱</div>
-                        <div class="kpi-value">40</div>
+                        <div class="kpi-value" id="clientes-social">40</div>
                         <div class="kpi-label">Vía Social Media</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">🏢</div>
-                        <div class="kpi-value">14</div>
+                        <div class="kpi-value" id="clientes-presencial">14</div>
                         <div class="kpi-label">Visitas Presenciales</div>
                     </div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">💰</div>
-                        <div class="kpi-value">Q137K</div>
+                        <div class="kpi-value" id="clientes-ticket">Q137K</div>
                         <div class="kpi-label">Ticket Promedio</div>
                     </div>
                 </div>
@@ -1011,19 +789,19 @@
                     <h3 class="summary-title">👥 Perfil de Clientes</h3>
                     <div class="summary-item">
                         <span>Clientes Nuevos</span>
-                        <strong>40 (66.7%)</strong>
+                        <strong id="clientes-summary-nuevos">40 (66.7%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Ampliaciones</span>
-                        <strong>20 (33.3%)</strong>
+                        <strong id="clientes-summary-ampliaciones">20 (33.3%)</strong>
                     </div>
                     <div class="summary-item">
                         <span>Canal Principal</span>
-                        <strong>Social Manager</strong>
+                        <strong id="clientes-summary-canal">Social Manager</strong>
                     </div>
                     <div class="summary-item">
                         <span>Tasa Conversión</span>
-                        <strong>89.5%</strong>
+                        <strong id="clientes-summary-conversion">89.5%</strong>
                     </div>
                 </div>
             </div>
@@ -1047,181 +825,16 @@
                     </div>
                 </div>
             </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3 class="chart-title">👥 Análisis de Clientes por Canal</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Canal</th>
-                            <th>Clientes</th>
-                            <th>% Total</th>
-                            <th>Monto Promedio</th>
-                            <th>Ticket Mínimo</th>
-                            <th>Ticket Máximo</th>
-                            <th>Eficiencia</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Social Manager</strong></td>
-                            <td>40</td>
-                            <td>66.7%</td>
-                            <td>Q142.000</td>
-                            <td>Q30.000</td>
-                            <td>Q750.000</td>
-                            <td><span class="status-badge status-active">Excelente</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Visita Oficina</strong></td>
-                            <td>14</td>
-                            <td>23.3%</td>
-                            <td>Q155.000</td>
-                            <td>Q50.000</td>
-                            <td>Q350.000</td>
-                            <td><span class="status-badge status-active">Muy Buena</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Correo Electrónico</strong></td>
-                            <td>4</td>
-                            <td>6.7%</td>
-                            <td>Q125.000</td>
-                            <td>Q75.000</td>
-                            <td>Q200.000</td>
-                            <td><span class="status-badge status-pending">Buena</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Otros Canales</strong></td>
-                            <td>2</td>
-                            <td>3.3%</td>
-                            <td>Q100.000</td>
-                            <td>Q100.000</td>
-                            <td>Q100.000</td>
-                            <td><span class="status-badge status-completed">Regular</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Tipos Tab -->
-        <div class="tab-content" id="sucursales">
-            <div class="cooperativas-grid">
-                <div class="card">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Distribución de Montos</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="sucursalesDonut"></canvas>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Casos por Sucursal</h3>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="casosChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <div class="chart-header">
-                    <h3 class="chart-title">Comparativo por Sucursal</h3>
-                </div>
-                <div class="chart-wrapper large-chart">
-                    <canvas id="comparativoChart"></canvas>
-                </div>
-            </div>
         </div>
 
         <!-- Detalle Tab -->
         <div class="tab-content" id="detalle">
             <div class="card">
                 <div class="chart-header">
-                    <h3 class="chart-title">📊 Reporte Ejecutivo Completo - Julio 2025</h3>
-                    <div class="chart-controls">
-                        <button class="control-btn active">Resumen</button>
-                        <button class="control-btn">Performance</button>
-                        <button class="control-btn">ROI</button>
-                    </div>
+                    <h3 class="chart-title" id="detalle-title">📊 Reporte Ejecutivo Completo - Julio 2025</h3>
                 </div>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Sucursal</th>
-                            <th>Casos</th>
-                            <th>Desembolsos</th>
-                            <th>Inversión Pauta</th>
-                            <th>Retorno</th>
-                            <th>Costo/Cliente</th>
-                            <th>Ticket Prom.</th>
-                            <th>Performance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>CENTRAL</strong></td>
-                            <td>28</td>
-                            <td>Q4.930.000</td>
-                            <td>Q157.289</td>
-                            <td>31.4X</td>
-                            <td>Q5.617</td>
-                            <td>Q176.071</td>
-                            <td><span class="status-badge status-active">Líder</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>PETÉN</strong></td>
-                            <td>6</td>
-                            <td>Q1.380.000</td>
-                            <td>Q28.280</td>
-                            <td>48.8X</td>
-                            <td>Q4.713</td>
-                            <td>Q230.000</td>
-                            <td><span class="status-badge status-active">Estrella</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>ESCUINTLA</strong></td>
-                            <td>10</td>
-                            <td>Q970.000</td>
-                            <td>Q30.335</td>
-                            <td>32.0X</td>
-                            <td>Q3.034</td>
-                            <td>Q97.000</td>
-                            <td><span class="status-badge status-active">Eficiente</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>COBÁN</strong></td>
-                            <td>7</td>
-                            <td>Q390.000</td>
-                            <td>Q31.448</td>
-                            <td>12.4X</td>
-                            <td>Q4.493</td>
-                            <td>Q55.714</td>
-                            <td><span class="status-badge status-pending">Crecimiento</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>MAZATENANGO</strong></td>
-                            <td>4</td>
-                            <td>Q335.000</td>
-                            <td>Q28.169</td>
-                            <td>11.9X</td>
-                            <td>Q7.042</td>
-                            <td>Q83.750</td>
-                            <td><span class="status-badge status-active">Potencial</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>4 CAMINOS</strong></td>
-                            <td>2</td>
-                            <td>Q200.000</td>
-                            <td>Q26.086</td>
-                            <td>7.7X</td>
-                            <td>Q13.043</td>
-                            <td>Q100.000</td>
-                            <td><span class="status-badge status-completed">Nuevo</span></td>
-                        </tr>
-                    </tbody>
+                <table class="data-table" id="detalle-table">
+                    <!-- Dynamic content -->
                 </table>
             </div>
 
@@ -1239,113 +852,120 @@
                         <div style="margin-bottom: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                 <span>Eficiencia Promedio de Pauta</span>
-                                <strong>27.2X retorno</strong>
+                                <strong id="metricas-eficiencia">27.2X retorno</strong>
                             </div>
                             <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-                                <div style="width: 95%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                                <div id="metricas-bar-eficiencia" style="width: 95%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
                             </div>
                         </div>
                         
                         <div style="margin-bottom: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                 <span>Inversión vs Retorno</span>
-                                <strong>Q1 → Q27.19</strong>
+                                <strong id="metricas-ratio">Q1 → Q27.19</strong>
                             </div>
                             <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-                                <div style="width: 90%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);"></div>
+                                <div id="metricas-bar-ratio" style="width: 90%; height: 100%; background: linear-gradient(90deg, #8b5cf6, #a78bfa);"></div>
                             </div>
                         </div>
                         
                         <div style="margin-bottom: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                 <span>Casos Nuevos vs Ampliaciones</span>
-                                <strong>67% vs 33%</strong>
+                                <strong id="metricas-casos">67% vs 33%</strong>
                             </div>
                             <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-                                <div style="width: 67%; height: 100%; background: linear-gradient(90deg, #ff6b35, #ffa366);"></div>
+                                <div id="metricas-bar-casos" style="width: 67%; height: 100%; background: linear-gradient(90deg, #ff6b35, #ffa366);"></div>
                             </div>
                         </div>
 
                         <div style="margin-bottom: 1.5rem;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
                                 <span>Canal Principal (Social Manager)</span>
-                                <strong>66.7%</strong>
+                                <strong id="metricas-canal">66.7%</strong>
                             </div>
                             <div style="background: #f1f5f9; height: 8px; border-radius: 4px; overflow: hidden;">
-                                <div style="width: 66.7%; height: 100%; background: linear-gradient(90deg, #06b6d4, #67e8f9);"></div>
+                                <div id="metricas-bar-canal" style="width: 66.7%; height: 100%; background: linear-gradient(90deg, #06b6d4, #67e8f9);"></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <div class="card" style="margin-top: 2rem;">
-                <h3 class="chart-title">📋 Resumen Ejecutivo por Tipo de Caso</h3>
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Tipo de Caso</th>
-                            <th>Cantidad</th>
-                            <th>% del Total</th>
-                            <th>Monto Total</th>
-                            <th>% de Montos</th>
-                            <th>Ticket Promedio</th>
-                            <th>Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>CASOS NUEVOS</strong></td>
-                            <td>40</td>
-                            <td>66.7%</td>
-                            <td>Q6.500.000</td>
-                            <td>79.3%</td>
-                            <td>Q162.500</td>
-                            <td><span class="status-badge status-active">Principal motor de crecimiento</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>AMPLIACIONES</strong></td>
-                            <td>20</td>
-                            <td>33.3%</td>
-                            <td>Q1.700.000</td>
-                            <td>20.7%</td>
-                            <td>Q85.000</td>
-                            <td><span class="status-badge status-pending">Oportunidad de optimización</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 
     <script>
-        // Tab functionality
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const targetTab = this.dataset.tab;
-                
-                // Update tab buttons
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Update tab content
-                document.querySelectorAll('.tab-content').forEach(content => {
-                    content.classList.remove('active');
-                });
-                document.getElementById(targetTab).classList.add('active');
-                
-                // Initialize charts for the active tab with delay
-                setTimeout(() => {
-                    try {
-                        initializeChartsForTab(targetTab);
-                    } catch (error) {
-                        console.log('Chart initialization error:', error);
-                    }
-                }, 200);
-            });
-        });
+        // ========================================
+        // DATOS MULTI-MES
+        // ========================================
+        
+        const monthlyData = {
+            junio: {
+                // Datos de ejemplo para junio - REEMPLAZAR con datos reales del Excel
+                general: {
+                    totalDesembolsado: 6.8, // Millones
+                    totalCasos: 45,
+                    totalInversionPauta: 245.5, // Miles
+                    retornoPromedio: 27.7,
+                    promedioPorCaso: 151
+                },
+                sucursales: {
+                    labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+                    desembolsos: [3.8, 1.2, 0.9, 0.45, 0.35, 0.1],
+                    casos: [22, 5, 8, 6, 3, 1],
+                    gastosPauta: [125.5, 25.0, 28.5, 30.0, 26.5, 10.0],
+                    roi: [3024, 4800, 3157, 1500, 1320, 1000],
+                    costoXCaso: [5704, 5000, 3562, 5000, 8833, 10000]
+                },
+                tipos: {
+                    labels: ['NUEVO', 'AMPLIACION'],
+                    casos: [30, 15],
+                    montos: [5.2, 1.6]
+                },
+                clientes: {
+                    canales: ['Social Manager', 'Visita Oficina', 'Correo Electrónico', 'Otros'],
+                    casos: [28, 12, 3, 2],
+                    promedios: [145, 160, 120, 95]
+                }
+            },
+            julio: {
+                // Datos originales de julio
+                general: {
+                    totalDesembolsado: 8.2,
+                    totalCasos: 60,
+                    totalInversionPauta: 302,
+                    retornoPromedio: 27.2,
+                    promedioPorCaso: 137
+                },
+                sucursales: {
+                    labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+                    desembolsos: [4.93, 1.38, 0.97, 0.39, 0.335, 0.20],
+                    casos: [28, 6, 10, 7, 4, 2],
+                    gastosPauta: [157.289, 28.280, 30.335, 31.448, 28.169, 26.086],
+                    roi: [3135, 4882, 3197, 1240, 1189, 767],
+                    costoXCaso: [5617, 4713, 3034, 4493, 7042, 13043]
+                },
+                tipos: {
+                    labels: ['NUEVO', 'AMPLIACION'],
+                    casos: [40, 20],
+                    montos: [6.5, 1.7]
+                },
+                clientes: {
+                    canales: ['Social Manager', 'Visita Oficina', 'Correo Electrónico', 'Otros'],
+                    casos: [40, 14, 4, 2],
+                    promedios: [142, 155, 125, 100]
+                }
+            }
+        };
 
-        // Chart configurations
+        // Variables globales
+        let currentMonth = 'julio';
+        let chartInstances = {};
+
+        // ========================================
+        // CONFIGURACIÓN DE CHARTS
+        // ========================================
+        
         const brandColors = {
             primary: '#ff6b35',
             secondary: '#ffa366',
@@ -1356,757 +976,928 @@
             info: '#06b6d4'
         };
 
-        // Datos reales del Excel - Julio 2025 (SIN duplicados + Gastos de Pauta)
-        const sucursalesData = {
-            labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
-            desembolsos: [4.93, 1.38, 0.97, 0.39, 0.335, 0.20],
-            casos: [28, 6, 10, 7, 4, 2],
-            gastosPauta: [157.289, 28.280, 30.335, 31.448, 28.169, 26.086],
-            roi: [3135, 4882, 3197, 1240, 1189, 767], // ROI en porcentaje
-            costoXCaso: [5617, 4713, 3034, 4493, 7042, 13043]
-        };
+        // ========================================
+        // FUNCIONES DE ACTUALIZACIÓN DE UI
+        // ========================================
+        
+        function updateHeaderStats(month) {
+            const data = monthlyData[month];
+            document.getElementById('current-month').textContent = 
+                month === 'julio' ? 'Julio 2025' : 'Junio 2025';
+            document.getElementById('stat-desembolsado').textContent = `Q${data.general.totalDesembolsado}M`;
+            document.getElementById('stat-casos').textContent = data.general.totalCasos;
+            document.getElementById('stat-inversion').textContent = `Q${data.general.totalInversionPauta}K`;
+            document.getElementById('stat-retorno').textContent = `${data.general.retornoPromedio}X`;
+        }
 
-        const tiposData = {
-            labels: ['NUEVO', 'AMPLIACION'],
-            casos: [40, 20], // Corregido a 60 casos totales
-            montos: [6.5, 1.7]
-        };
+        function updateKPIs(month) {
+            const data = monthlyData[month];
+            document.getElementById('kpi-desembolsado').textContent = `Q${data.general.totalDesembolsado}M`;
+            document.getElementById('kpi-casos').textContent = data.general.totalCasos;
+            document.getElementById('kpi-sucursales').textContent = data.sucursales.labels.length;
+            document.getElementById('kpi-promedio').textContent = `Q${data.general.promedioPorCaso}K`;
+        }
 
-        // Datos para análisis geográfico y de clientes
-        const geograficoData = {
-            regiones: ['Central', 'Norte (Petén)', 'Sur (Escuintla)', 'Norte Central (Cobán)', 'Sur Occidente (Maza)', 'Occidente (4 Cam)'],
-            montos: [4.93, 1.38, 0.97, 0.39, 0.335, 0.20],
-            casos: [28, 6, 10, 7, 4, 2],
-            poblacion: [2500, 700, 800, 300, 400, 500], // en miles
-            penetracion: [0.001, 0.0009, 0.0013, 0.0023, 0.001, 0.0004]
-        };
+        function updateSummaryBoxes(month) {
+            const data = monthlyData[month];
+            const monthName = month === 'julio' ? 'Julio' : 'Junio';
+            
+            document.getElementById('summary-title').textContent = `📊 Resumen ${monthName} 2025`;
+            
+            const nuevosPercent = ((data.tipos.casos[0] / data.general.totalCasos) * 100).toFixed(1);
+            const ampliacionesPercent = ((data.tipos.casos[1] / data.general.totalCasos) * 100).toFixed(1);
+            
+            document.getElementById('summary-nuevos').textContent = `${data.tipos.casos[0]} (${nuevosPercent}%)`;
+            document.getElementById('summary-ampliaciones').textContent = `${data.tipos.casos[1]} (${ampliacionesPercent}%)`;
+            document.getElementById('summary-retorno').textContent = `${data.general.retornoPromedio}X`;
+            
+            // Encontrar la sucursal con mejor ROI
+            const maxROIIndex = data.sucursales.roi.indexOf(Math.max(...data.sucursales.roi));
+            const mejorSucursal = data.sucursales.labels[maxROIIndex];
+            const mejorROI = (data.sucursales.roi[maxROIIndex] / 100).toFixed(1);
+            document.getElementById('summary-mejor').textContent = `${mejorSucursal} (${mejorROI}X)`;
+        }
 
-        const clientesData = {
-            canales: ['Social Manager', 'Visita Oficina', 'Correo Electrónico', 'Otros'],
-            casos: [40, 14, 4, 2], // Corregido a 60 casos totales
-            promedios: [142, 155, 125, 100],
-            rangos: {
-                'Q30K-Q100K': 28,
-                'Q100K-Q200K': 20,
-                'Q200K-Q400K': 9,
-                'Q400K+': 3
-            }
-        };
+        function updateGeograficoKPIs(month) {
+            const data = monthlyData[month];
+            
+            // Encontrar región líder (mayor desembolso)
+            const maxDesembolsoIndex = data.sucursales.desembolsos.indexOf(Math.max(...data.sucursales.desembolsos));
+            const regionLider = data.sucursales.labels[maxDesembolsoIndex];
+            
+            // Encontrar región con mayor eficiencia
+            const maxROIIndex = data.sucursales.roi.indexOf(Math.max(...data.sucursales.roi));
+            const regionEficiente = data.sucursales.labels[maxROIIndex];
+            
+            // Región con mayor potencial (menor cantidad de casos pero buena población)
+            const regionPotencial = data.sucursales.labels[data.sucursales.labels.length - 1]; // Última sucursal
+            
+            document.getElementById('geo-regiones').textContent = data.sucursales.labels.length;
+            document.getElementById('geo-lider').textContent = regionLider;
+            document.getElementById('geo-eficiencia').textContent = regionEficiente;
+            document.getElementById('geo-potencial').textContent = regionPotencial;
+            
+            // Actualizar resumen geográfico
+            const totalDesembolso = data.sucursales.desembolsos.reduce((a, b) => a + b, 0);
+            const centralPercent = ((data.sucursales.desembolsos[0] / totalDesembolso) * 100).toFixed(1);
+            const nortePercent = ((data.sucursales.desembolsos[1] / totalDesembolso) * 100).toFixed(1);
+            const surPercent = ((data.sucursales.desembolsos[2] / totalDesembolso) * 100).toFixed(1);
+            const occidentePercent = ((data.sucursales.desembolsos[5] / totalDesembolso) * 100).toFixed(1);
+            
+            document.getElementById('geo-summary-central').textContent = `Q${data.sucursales.desembolsos[0]}M (${centralPercent}%)`;
+            document.getElementById('geo-summary-norte').textContent = `Q${data.sucursales.desembolsos[1]}M (${nortePercent}%)`;
+            document.getElementById('geo-summary-sur').textContent = `Q${data.sucursales.desembolsos[2]}M (${surPercent}%)`;
+            document.getElementById('geo-summary-occidente').textContent = `Q${(data.sucursales.desembolsos[5] * 1000).toFixed(0)}K (${occidentePercent}%)`;
+        }
 
-        // Chart initialization functions
-        function initializeChartsForTab(tab) {
-            try {
-                switch(tab) {
-                    case 'overview':
-                        initOverviewChart();
-                        break;
-                    case 'eficiencia':
-                        setTimeout(() => {
-                            initPautaComparativeChart();
-                            initEficienciaSucursalChart();
-                            initCostoPorClienteChart();
-                        }, 300);
-                        break;
-                    case 'geografico':
-                        setTimeout(() => {
-                            initGeograficoChart();
-                            initPerformanceRegionChart();
-                            initPenetracionChart();
-                        }, 300);
-                        break;
-                    case 'clientes':
-                        setTimeout(() => {
-                            initCanalesChart();
-                            initDistribucionMontosChart();
-                            initEficienciaCanalChart();
-                        }, 300);
-                        break;
-                    case 'detalle':
-                        setTimeout(() => {
-                            initRankingChart();
-                        }, 300);
-                        break;
+        function updateClientesKPIs(month) {
+            const data = monthlyData[month];
+            
+            const totalClientes = data.clientes.casos.reduce((a, b) => a + b, 0);
+            const socialMediaClientes = data.clientes.casos[0];
+            const presencialClientes = data.clientes.casos[1];
+            
+            // Calcular ticket promedio general
+            const ticketPromedio = (data.general.totalDesembolsado * 1000000 / totalClientes / 1000).toFixed(0);
+            
+            document.getElementById('clientes-unicos').textContent = totalClientes;
+            document.getElementById('clientes-social').textContent = socialMediaClientes;
+            document.getElementById('clientes-presencial').textContent = presencialClientes;
+            document.getElementById('clientes-ticket').textContent = `Q${ticketPromedio}K`;
+            
+            // Actualizar resumen de clientes
+            const nuevosPercent = ((data.tipos.casos[0] / totalClientes) * 100).toFixed(1);
+            const ampliacionesPercent = ((data.tipos.casos[1] / totalClientes) * 100).toFixed(1);
+            const socialPercent = ((socialMediaClientes / totalClientes) * 100).toFixed(1);
+            
+            document.getElementById('clientes-summary-nuevos').textContent = `${data.tipos.casos[0]} (${nuevosPercent}%)`;
+            document.getElementById('clientes-summary-ampliaciones').textContent = `${data.tipos.casos[1]} (${ampliacionesPercent}%)`;
+            document.getElementById('clientes-summary-canal').textContent = data.clientes.canales[0];
+            document.getElementById('clientes-summary-conversion').textContent = `${socialPercent}%`;
+        }
+
+        function updateMetricasDetalle(month) {
+            const data = monthlyData[month];
+            
+            // Actualizar métricas clave en la pestaña de detalle
+            document.getElementById('metricas-eficiencia').textContent = `${data.general.retornoPromedio}X retorno`;
+            
+            const ratio = data.general.retornoPromedio;
+            document.getElementById('metricas-ratio').textContent = `Q1 → Q${ratio}`;
+            
+            const nuevosPercent = ((data.tipos.casos[0] / data.general.totalCasos) * 100).toFixed(0);
+            const ampliacionesPercent = ((data.tipos.casos[1] / data.general.totalCasos) * 100).toFixed(0);
+            document.getElementById('metricas-casos').textContent = `${nuevosPercent}% vs ${ampliacionesPercent}%`;
+            
+            const socialPercent = ((data.clientes.casos[0] / data.general.totalCasos) * 100).toFixed(1);
+            document.getElementById('metricas-canal').textContent = `${socialPercent}%`;
+            
+            // Actualizar barras de progreso
+            const eficienciaBar = Math.min(95, (ratio / 30) * 100); // Normalizar para mostrar
+            document.getElementById('metricas-bar-eficiencia').style.width = `${eficienciaBar}%`;
+            
+            const ratioBar = Math.min(90, (ratio / 35) * 100);
+            document.getElementById('metricas-bar-ratio').style.width = `${ratioBar}%`;
+            
+            document.getElementById('metricas-bar-casos').style.width = `${nuevosPercent}%`;
+            document.getElementById('metricas-bar-canal').style.width = `${socialPercent}%`;
+        }
+
+        function updateEficienciaKPIs(month) {
+            const data = monthlyData[month];
+            document.getElementById('kpi-eficiencia-retorno').textContent = `${data.general.retornoPromedio}X`;
+            document.getElementById('kpi-eficiencia-inversion').textContent = `Q${data.general.totalInversionPauta}K`;
+            
+            const costoPromedio = data.general.totalInversionPauta * 1000 / data.general.totalCasos;
+            document.getElementById('kpi-eficiencia-costo').textContent = `Q${(costoPromedio/1000).toFixed(1)}K`;
+            
+            // Tasa de conversión aproximada
+            document.getElementById('kpi-eficiencia-conversion').textContent = '18.9%';
+            
+            // Actualizar summary box de eficiencia
+            const totalInversion = data.general.totalInversionPauta * 1000;
+            const totalDesembolsos = data.general.totalDesembolsado * 1000000;
+            const ganancia = totalDesembolsos - totalInversion;
+            const ratio = totalDesembolsos / totalInversion;
+            
+            document.getElementById('eficiencia-summary-inversion').textContent = `Q${totalInversion.toLocaleString()}`;
+            document.getElementById('eficiencia-summary-desembolsos').textContent = `Q${totalDesembolsos.toLocaleString()}`;
+            document.getElementById('eficiencia-summary-ganancia').textContent = `Q${ganancia.toLocaleString()}`;
+            document.getElementById('eficiencia-summary-ratio').textContent = `Cada Q1 → Q${ratio.toFixed(2)}`;
+        }
+
+        function updateTablesContent(month) {
+            const data = monthlyData[month];
+            
+            // Tabla de eficiencia
+            const eficienciaTable = document.getElementById('eficiencia-table');
+            let eficienciaHTML = `
+                <thead>
+                    <tr>
+                        <th>Sucursal</th>
+                        <th>Inversión Pauta</th>
+                        <th>Desembolsos</th>
+                        <th>Retorno por Q1</th>
+                        <th>Costo/Cliente</th>
+                        <th>Casos</th>
+                        <th>Eficiencia</th>
+                        <th>Calificación</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            data.sucursales.labels.forEach((sucursal, i) => {
+                const retorno = (data.sucursales.roi[i] / 100).toFixed(2);
+                const eficiencia = data.sucursales.roi[i];
+                let calificacion = 'En Desarrollo';
+                let badgeClass = 'status-completed';
+                
+                if (eficiencia > 3000) {
+                    calificacion = 'Excelente';
+                    badgeClass = 'status-active';
+                } else if (eficiencia > 1500) {
+                    calificacion = 'Muy Buena';
+                    badgeClass = 'status-active';
+                } else if (eficiencia > 1000) {
+                    calificacion = 'Buena';
+                    badgeClass = 'status-pending';
                 }
-            } catch (error) {
-                console.log('Error in chart initialization:', error);
+                
+                eficienciaHTML += `
+                    <tr>
+                        <td><strong>${sucursal}</strong></td>
+                        <td>Q${data.sucursales.gastosPauta[i].toLocaleString()}</td>
+                        <td>Q${(data.sucursales.desembolsos[i] * 1000000).toLocaleString()}</td>
+                        <td>Q${retorno}</td>
+                        <td>Q${data.sucursales.costoXCaso[i].toLocaleString()}</td>
+                        <td>${data.sucursales.casos[i]}</td>
+                        <td>${(eficiencia/100).toFixed(0)}%</td>
+                        <td><span class="status-badge ${badgeClass}">${calificacion}</span></td>
+                    </tr>
+                `;
+            });
+            
+            eficienciaHTML += '</tbody>';
+            eficienciaTable.innerHTML = eficienciaHTML;
+            
+            // Tabla de detalle
+            const detalleTable = document.getElementById('detalle-table');
+            let detalleHTML = `
+                <thead>
+                    <tr>
+                        <th>Sucursal</th>
+                        <th>Casos</th>
+                        <th>Desembolsos</th>
+                        <th>Inversión Pauta</th>
+                        <th>Retorno</th>
+                        <th>Costo/Cliente</th>
+                        <th>Ticket Prom.</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+            
+            data.sucursales.labels.forEach((sucursal, i) => {
+                const retorno = (data.sucursales.roi[i] / 100).toFixed(1);
+                const ticketProm = (data.sucursales.desembolsos[i] * 1000000 / data.sucursales.casos[i]).toFixed(0);
+                
+                let performance = 'Nuevo';
+                let badgeClass = 'status-completed';
+                
+                if (i === 0) {
+                    performance = 'Líder';
+                    badgeClass = 'status-active';
+                } else if (data.sucursales.roi[i] > 4000) {
+                    performance = 'Estrella';
+                    badgeClass = 'status-active';
+                } else if (data.sucursales.roi[i] > 3000) {
+                    performance = 'Eficiente';
+                    badgeClass = 'status-active';
+                } else if (data.sucursales.roi[i] > 1200) {
+                    performance = 'Crecimiento';
+                    badgeClass = 'status-pending';
+                }
+                
+                detalleHTML += `
+                    <tr>
+                        <td><strong>${sucursal}</strong></td>
+                        <td>${data.sucursales.casos[i]}</td>
+                        <td>Q${(data.sucursales.desembolsos[i] * 1000000).toLocaleString()}</td>
+                        <td>Q${data.sucursales.gastosPauta[i].toLocaleString()}</td>
+                        <td>${retorno}X</td>
+                        <td>Q${data.sucursales.costoXCaso[i].toLocaleString()}</td>
+                        <td>Q${parseInt(ticketProm).toLocaleString()}</td>
+                        <td><span class="status-badge ${badgeClass}">${performance}</span></td>
+                    </tr>
+                `;
+            });
+            
+            detalleHTML += '</tbody>';
+            detalleTable.innerHTML = detalleHTML;
+            
+            // Actualizar título de detalle
+            const monthName = month === 'julio' ? 'Julio' : 'Junio';
+            document.getElementById('detalle-title').textContent = `📊 Reporte Ejecutivo Completo - ${monthName} 2025`;
+        }
+
+        // ========================================
+        // FUNCIONES DE CHARTS
+        // ========================================
+        
+        function destroyChart(chartId) {
+            if (chartInstances[chartId]) {
+                chartInstances[chartId].destroy();
+                delete chartInstances[chartId];
             }
         }
 
-        function initOverviewChart() {
+        function createOverviewChart(month) {
+            destroyChart('overview');
             const ctx = document.getElementById('overviewChart');
             if (!ctx) return;
             
-            try {
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: sucursalesData.labels,
-                        datasets: [{
-                            data: sucursalesData.desembolsos,
-                            backgroundColor: [
-                                '#ff6b35', '#ffa366', '#ff8c42', 
-                                '#ffb366', '#ff9f59', '#ffcc99'
-                            ],
-                            borderWidth: 4,
-                            borderColor: '#fff',
-                            hoverOffset: 15
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '60%',
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { 
-                                    padding: 15, 
-                                    font: { size: 11 }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                        return `${context.label}: Q${context.parsed}M (${percentage}%)`;
-                                    }
+            const data = monthlyData[month];
+            chartInstances['overview'] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        data: data.sucursales.desembolsos,
+                        backgroundColor: [
+                            '#ff6b35', '#ffa366', '#ff8c42', 
+                            '#ffb366', '#ff9f59', '#ffcc99'
+                        ],
+                        borderWidth: 4,
+                        borderColor: '#fff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { 
+                                padding: 15, 
+                                font: { size: 11 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: Q${context.parsed}M (${percentage}%)`;
                                 }
                             }
                         }
                     }
-                });
-            } catch (error) {
-                console.log('Error creating overview chart:', error);
-            }
+                }
+            });
         }
 
-        // Nuevas funciones para gráficos geográficos
-        function initGeograficoChart() {
+        function createPautaComparativeChart(month) {
+            destroyChart('pautaComparative');
+            const ctx = document.getElementById('pautaComparativeChart');
+            if (!ctx) return;
+            
+            const data = monthlyData[month];
+            chartInstances['pautaComparative'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        label: 'Desembolsos (Millones Q)',
+                        data: data.sucursales.desembolsos,
+                        backgroundColor: brandColors.success + '80',
+                        borderColor: brandColors.success,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Gastos Pauta (Miles Q)',
+                        data: data.sucursales.gastosPauta.map(g => g/1000),
+                        backgroundColor: brandColors.error + '80',
+                        borderColor: brandColors.error,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Desembolsos (Millones Q)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Q' + value + 'M';
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Gastos Pauta (Miles Q)' },
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Q' + value + 'K';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createEficienciaSucursalChart(month) {
+            destroyChart('eficienciaSucursal');
+            const ctx = document.getElementById('eficienciaSucursalChart');
+            if (!ctx) return;
+            
+            const data = monthlyData[month];
+            chartInstances['eficienciaSucursal'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        label: 'Retorno por Q1',
+                        data: data.sucursales.roi.map(roi => roi/100),
+                        backgroundColor: data.sucursales.roi.map(roi => {
+                            if (roi > 3000) return brandColors.success + '80';
+                            if (roi > 1500) return brandColors.warning + '80';
+                            return brandColors.info + '80';
+                        }),
+                        borderColor: data.sucursales.roi.map(roi => {
+                            if (roi > 3000) return brandColors.success;
+                            if (roi > 1500) return brandColors.warning;
+                            return brandColors.info;
+                        }),
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Retorno: Q${context.parsed.y.toFixed(2)} por cada Q1 invertido`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Retorno por Q1' },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Q' + value.toFixed(1);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCostoPorClienteChart(month) {
+            destroyChart('costoPorCliente');
+            const ctx = document.getElementById('costoPorClienteChart');
+            if (!ctx) return;
+            
+            const data = monthlyData[month];
+            chartInstances['costoPorCliente'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        label: 'Costo por Cliente (Q)',
+                        data: data.sucursales.costoXCaso,
+                        borderColor: brandColors.primary,
+                        backgroundColor: brandColors.primary + '20',
+                        borderWidth: 4,
+                        pointRadius: 8,
+                        pointBackgroundColor: brandColors.primary,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Costo por cliente: Q${context.parsed.y.toLocaleString()}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Costo por Cliente (Q)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Q' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createGeograficoChart(month) {
+            destroyChart('geografico');
             const ctx = document.getElementById('geograficoChart');
             if (!ctx) return;
             
-            try {
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: geograficoData.regiones,
-                        datasets: [{
-                            data: geograficoData.montos,
-                            backgroundColor: [
-                                '#ff6b35', '#ffa366', '#ff8c42', 
-                                '#ffb366', '#ff9f59', '#ffcc99'
-                            ],
-                            borderWidth: 4,
-                            borderColor: '#fff',
-                            hoverOffset: 15
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '50%',
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { padding: 15, font: { size: 10 } }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                        return `${context.label}: Q${context.parsed}M (${percentage}%)`;
-                                    }
+            const data = monthlyData[month];
+            chartInstances['geografico'] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        data: data.sucursales.desembolsos,
+                        backgroundColor: [
+                            '#ff6b35', '#ffa366', '#ff8c42', 
+                            '#ffb366', '#ff9f59', '#ffcc99'
+                        ],
+                        borderWidth: 4,
+                        borderColor: '#fff',
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '50%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 15, font: { size: 10 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: Q${context.parsed}M (${percentage}%)`;
                                 }
                             }
                         }
                     }
-                });
-            } catch (error) {
-                console.log('Error creating geografico chart:', error);
-            }
+                }
+            });
         }
 
-        function initPerformanceRegionChart() {
-            const ctx = document.getElementById('performanceRegionChart');
-            if (!ctx) return;
-            
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: geograficoData.regiones,
-                        datasets: [{
-                            label: 'Casos',
-                            data: geograficoData.casos,
-                            backgroundColor: brandColors.info + '80',
-                            borderColor: brandColors.info,
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            yAxisID: 'y'
-                        }, {
-                            label: 'Penetración (%)',
-                            data: geograficoData.penetracion.map(p => p * 1000), // Convertir a escala visible
-                            type: 'line',
-                            borderColor: brandColors.warning,
-                            backgroundColor: brandColors.warning,
-                            borderWidth: 3,
-                            pointRadius: 6,
-                            yAxisID: 'y1'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'top' } },
-                        scales: {
-                            y: {
-                                type: 'linear',
-                                display: true,
-                                position: 'left',
-                                title: { display: true, text: 'Casos' }
-                            },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                title: { display: true, text: 'Penetración (‰)' },
-                                grid: { drawOnChartArea: false }
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.log('Error creating performance region chart:', error);
-            }
-        }
-
-        function initPenetracionChart() {
-            const ctx = document.getElementById('penetracionChart');
-            if (!ctx) return;
-            
-            try {
-                new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: geograficoData.regiones,
-                        datasets: [{
-                            label: 'Oportunidad de Mercado',
-                            data: geograficoData.poblacion.map((p, i) => 
-                                (p / geograficoData.casos[i]) * 0.1 // Factor de oportunidad
-                            ),
-                            borderColor: brandColors.primary,
-                            backgroundColor: brandColors.primary + '20',
-                            borderWidth: 3,
-                            pointRadius: 5,
-                            pointBackgroundColor: brandColors.primary
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top' }
-                        },
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                ticks: { display: false }
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.log('Error creating penetracion chart:', error);
-            }
-        }
-
-        // Nuevas funciones para gráficos de clientes
-        function initCanalesChart() {
+        function createCanalesChart(month) {
+            destroyChart('canales');
             const ctx = document.getElementById('canalesChart');
             if (!ctx) return;
             
-            try {
-                new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: clientesData.canales,
-                        datasets: [{
-                            data: clientesData.casos,
-                            backgroundColor: [
-                                brandColors.primary, brandColors.info, 
-                                brandColors.success, brandColors.accent
-                            ],
-                            borderWidth: 4,
-                            borderColor: '#fff',
-                            hoverOffset: 10
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { padding: 15 }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                        return `${context.label}: ${context.parsed} clientes (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.log('Error creating canales chart:', error);
-            }
-        }
-
-        function initDistribucionMontosChart() {
-            const ctx = document.getElementById('distribucionMontosChart');
-            if (!ctx) return;
-            
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: Object.keys(clientesData.rangos),
-                        datasets: [{
-                            label: 'Clientes por Rango',
-                            data: Object.values(clientesData.rangos),
-                            backgroundColor: [
-                                brandColors.info + '80',
-                                brandColors.success + '80',
-                                brandColors.warning + '80',
-                                brandColors.primary + '80'
-                            ],
-                            borderColor: [
-                                brandColors.info,
-                                brandColors.success,
-                                brandColors.warning,
-                                brandColors.primary
-                            ],
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        const total = Object.values(clientesData.rangos).reduce((a, b) => a + b, 0);
-                                        const percentage = ((context.parsed.y / total) * 100).toFixed(1);
-                                        return `${context.parsed.y} clientes (${percentage}%)`;
-                                    }
-                                }
-                            }
+            const data = monthlyData[month];
+            chartInstances['canales'] = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.clientes.canales,
+                    datasets: [{
+                        data: data.clientes.casos,
+                        backgroundColor: [
+                            brandColors.primary, brandColors.info, 
+                            brandColors.success, brandColors.accent
+                        ],
+                        borderWidth: 4,
+                        borderColor: '#fff',
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { padding: 15 }
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Número de Clientes' }
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.log('Error creating distribucion montos chart:', error);
-            }
-        }
-
-        function initEficienciaCanalChart() {
-            const ctx = document.getElementById('eficienciaCanalChart');
-            if (!ctx) return;
-            
-            try {
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: clientesData.canales,
-                        datasets: [{
-                            label: 'Ticket Promedio (Miles Q)',
-                            data: clientesData.promedios,
-                            borderColor: brandColors.success,
-                            backgroundColor: brandColors.success + '20',
-                            borderWidth: 4,
-                            pointRadius: 8,
-                            pointBackgroundColor: brandColors.success,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top' }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Ticket Promedio (Miles Q)' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value + 'K';
-                                    }
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: ${context.parsed} clientes (${percentage}%)`;
                                 }
                             }
                         }
                     }
-                });
-            } catch (error) {
-                console.log('Error creating eficiencia canal chart:', error);
-            }
+                }
+            });
         }
 
-        function initMediosChart() {
-            const ctx = document.getElementById('mediosChart');
-            if (!ctx) return;
-            
-            try {
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: mediosData.labels,
-                        datasets: [{
-                            data: mediosData.casos,
-                            backgroundColor: [
-                                brandColors.primary, brandColors.info, 
-                                brandColors.success, brandColors.accent
-                            ],
-                            borderWidth: 4,
-                            borderColor: '#fff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '50%',
-                        plugins: {
-                            legend: { position: 'bottom' }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.log('Error creating medios chart:', error);
-            }
-        }
-
-        function initEfectividadChart() {
-            const ctx = document.getElementById('efectividadChart');
-            if (!ctx) return;
-            
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: mediosData.labels,
-                        datasets: [{
-                            label: 'Promedio (Miles)',
-                            data: mediosData.efectividad,
-                            backgroundColor: brandColors.info + '80',
-                            borderColor: brandColors.info,
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value + 'K';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.log('Error creating efectividad chart:', error);
-            }
-        }
-
-        function initRankingChart() {
+        function createRankingChart(month) {
+            destroyChart('ranking');
             const ctx = document.getElementById('rankingChart');
             if (!ctx) return;
             
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: sucursalesData.labels,
-                        datasets: [{
-                            label: 'Montos (M)',
-                            data: sucursalesData.desembolsos,
-                            backgroundColor: brandColors.primary + '80',
-                            borderColor: brandColors.primary,
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value + 'M';
-                                    }
+            const data = monthlyData[month];
+            chartInstances['ranking'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        label: 'Montos (M)',
+                        data: data.sucursales.desembolsos,
+                        backgroundColor: brandColors.primary + '80',
+                        borderColor: brandColors.primary,
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Q' + value + 'M';
                                 }
                             }
                         }
                     }
-                });
-            } catch (error) {
-                console.log('Error creating ranking chart:', error);
-            }
+                }
+            });
         }
 
-        // Nuevas funciones para gráficos de ROI y Pauta
-        function initPautaComparativeChart() {
-            const ctx = document.getElementById('pautaComparativeChart');
-            if (!ctx) {
-                console.log('Canvas pautaComparativeChart not found');
-                return;
-            }
+        // Gráficas adicionales para Análisis Geográfico
+        function createPerformanceRegionChart(month) {
+            destroyChart('performanceRegion');
+            const ctx = document.getElementById('performanceRegionChart');
+            if (!ctx) return;
             
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: sucursalesData.labels,
-                        datasets: [{
-                            label: 'Desembolsos (Millones Q)',
-                            data: sucursalesData.desembolsos,
-                            backgroundColor: brandColors.success + '80',
-                            borderColor: brandColors.success,
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            yAxisID: 'y'
-                        }, {
-                            label: 'Gastos Pauta (Miles Q)',
-                            data: sucursalesData.gastosPauta.map(g => g/1000),
-                            backgroundColor: brandColors.error + '80',
-                            borderColor: brandColors.error,
-                            borderWidth: 2,
-                            borderRadius: 8,
-                            yAxisID: 'y1'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top' }
-                        },
-                        scales: {
-                            y: {
-                                type: 'linear',
-                                display: true,
-                                position: 'left',
-                                title: { display: true, text: 'Desembolsos (Millones Q)' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value + 'M';
-                                    }
-                                }
-                            },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                title: { display: true, text: 'Gastos Pauta (Miles Q)' },
-                                grid: { drawOnChartArea: false },
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value + 'K';
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-                console.log('PautaComparativeChart created successfully');
-            } catch (error) {
-                console.log('Error creating pauta comparative chart:', error);
-            }
-        }
-
-        function initEficienciaSucursalChart() {
-            const ctx = document.getElementById('eficienciaSucursalChart');
-            if (!ctx) {
-                console.log('Canvas eficienciaSucursalChart not found');
-                return;
-            }
+            const data = monthlyData[month];
+            const poblacion = [2500, 700, 800, 300, 400, 500]; // en miles
+            const penetracion = data.sucursales.casos.map((casos, i) => (casos / poblacion[i]) * 1000); // en promil
             
-            try {
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: sucursalesData.labels,
-                        datasets: [{
-                            label: 'Retorno por Q1',
-                            data: sucursalesData.roi.map(roi => roi/100), // Convertir a múltiplos
-                            backgroundColor: sucursalesData.roi.map(roi => {
-                                if (roi > 3000) return brandColors.success + '80';
-                                if (roi > 1500) return brandColors.warning + '80';
-                                return brandColors.info + '80';
-                            }),
-                            borderColor: sucursalesData.roi.map(roi => {
-                                if (roi > 3000) return brandColors.success;
-                                if (roi > 1500) return brandColors.warning;
-                                return brandColors.info;
-                            }),
-                            borderWidth: 2,
-                            borderRadius: 8
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { 
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `Retorno: Q${context.parsed.y.toFixed(2)} por cada Q1 invertido`;
-                                    }
-                                }
-                            }
+            chartInstances['performanceRegion'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        label: 'Casos',
+                        data: data.sucursales.casos,
+                        backgroundColor: brandColors.info + '80',
+                        borderColor: brandColors.info,
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Penetración (‰)',
+                        data: penetracion,
+                        type: 'line',
+                        borderColor: brandColors.warning,
+                        backgroundColor: brandColors.warning,
+                        borderWidth: 3,
+                        pointRadius: 6,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Casos' }
                         },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Retorno por Q1' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value.toFixed(1);
-                                    }
-                                }
-                            }
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Penetración (‰)' },
+                            grid: { drawOnChartArea: false }
                         }
                     }
-                });
-                console.log('EficienciaSucursalChart created successfully');
-            } catch (error) {
-                console.log('Error creating eficiencia sucursal chart:', error);
-            }
+                }
+            });
         }
 
-        function initCostoPorClienteChart() {
-            const ctx = document.getElementById('costoPorClienteChart');
-            if (!ctx) {
-                console.log('Canvas costoPorClienteChart not found');
-                return;
-            }
+        function createPenetracionChart(month) {
+            destroyChart('penetracion');
+            const ctx = document.getElementById('penetracionChart');
+            if (!ctx) return;
             
-            try {
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: sucursalesData.labels,
-                        datasets: [{
-                            label: 'Costo por Cliente (Q)',
-                            data: sucursalesData.costoXCaso,
-                            borderColor: brandColors.primary,
-                            backgroundColor: brandColors.primary + '20',
-                            borderWidth: 4,
-                            pointRadius: 8,
-                            pointBackgroundColor: brandColors.primary,
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 3,
-                            fill: true,
-                            tension: 0.4
-                        }]
+            const data = monthlyData[month];
+            const poblacion = [2500, 700, 800, 300, 400, 500]; // en miles
+            const oportunidad = poblacion.map((p, i) => (p / data.sucursales.casos[i]) * 0.1); // Factor de oportunidad
+            
+            chartInstances['penetracion'] = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.sucursales.labels,
+                    datasets: [{
+                        label: 'Oportunidad de Mercado',
+                        data: oportunidad,
+                        borderColor: brandColors.primary,
+                        backgroundColor: brandColors.primary + '20',
+                        borderWidth: 3,
+                        pointRadius: 5,
+                        pointBackgroundColor: brandColors.primary
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { position: 'top' },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        return `Costo por cliente: Q${context.parsed.y.toLocaleString()}`;
-                                    }
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            ticks: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráficas adicionales para Análisis de Clientes
+        function createDistribucionMontosChart(month) {
+            destroyChart('distribucionMontos');
+            const ctx = document.getElementById('distribucionMontosChart');
+            if (!ctx) return;
+            
+            // Datos de ejemplo para distribución de montos
+            const rangos = {
+                'Q30K-Q100K': month === 'julio' ? 28 : 22,
+                'Q100K-Q200K': month === 'julio' ? 20 : 15,
+                'Q200K-Q400K': month === 'julio' ? 9 : 6,
+                'Q400K+': month === 'julio' ? 3 : 2
+            };
+            
+            chartInstances['distribucionMontos'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(rangos),
+                    datasets: [{
+                        label: 'Clientes por Rango',
+                        data: Object.values(rangos),
+                        backgroundColor: [
+                            brandColors.info + '80',
+                            brandColors.success + '80',
+                            brandColors.warning + '80',
+                            brandColors.primary + '80'
+                        ],
+                        borderColor: [
+                            brandColors.info,
+                            brandColors.success,
+                            brandColors.warning,
+                            brandColors.primary
+                        ],
+                        borderWidth: 2,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = Object.values(rangos).reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed.y / total) * 100).toFixed(1);
+                                    return `${context.parsed.y} clientes (${percentage}%)`;
                                 }
                             }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Costo por Cliente (Q)' },
-                                ticks: {
-                                    callback: function(value) {
-                                        return 'Q' + value.toLocaleString();
-                                    }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Número de Clientes' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createEficienciaCanalChart(month) {
+            destroyChart('eficienciaCanal');
+            const ctx = document.getElementById('eficienciaCanalChart');
+            if (!ctx) return;
+            
+            const data = monthlyData[month];
+            chartInstances['eficienciaCanal'] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.clientes.canales,
+                    datasets: [{
+                        label: 'Ticket Promedio (Miles Q)',
+                        data: data.clientes.promedios,
+                        borderColor: brandColors.success,
+                        backgroundColor: brandColors.success + '20',
+                        borderWidth: 4,
+                        pointRadius: 8,
+                        pointBackgroundColor: brandColors.success,
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Ticket Promedio (Miles Q)' },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Q' + value + 'K';
                                 }
                             }
                         }
                     }
-                });
-                console.log('CostoPorClienteChart created successfully');
-            } catch (error) {
-                console.log('Error creating costo por cliente chart:', error);
-            }
+                }
+            });
         }
 
-        // Initialize default charts
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                // Inicializar el primer gráfico con más tiempo
-                setTimeout(() => {
-                    initOverviewChart();
-                }, 800);
-                
-                // Add entrance animations
-                const cards = document.querySelectorAll('.card, .kpi-card');
-                cards.forEach((card, index) => {
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateY(20px)';
-                    setTimeout(() => {
-                        card.style.transition = 'all 0.6s ease';
-                        card.style.opacity = '1';
-                        card.style.transform = 'translateY(0)';
-                    }, index * 100);
-                });
-            } catch (error) {
-                console.log('Initialization error:', error);
-            }
-        });
+        // ========================================
+        // FUNCIÓN PRINCIPAL DE CAMBIO DE MES
+        // ========================================
+        
+        function changeMonth(month) {
+            currentMonth = month;
+            
+            // Actualizar UI
+            updateHeaderStats(month);
+            updateKPIs(month);
+            updateSummaryBoxes(month);
+            updateEficienciaKPIs(month);
+            updateTablesContent(month);
+            
+            // Actualizar botones
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.month === month);
+            });
+            
+            // Recrear gráficos basados en la pestaña activa
+            const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+            initializeChartsForTab(activeTab);
+        }
 
-        // Control button functionality
-        document.querySelectorAll('.control-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
+        function initializeChartsForTab(tab) {
+            setTimeout(() => {
                 try {
-                    const parent = this.closest('.chart-controls');
-                    if (parent) {
-                        parent.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
+                    switch(tab) {
+                        case 'overview':
+                            createOverviewChart(currentMonth);
+                            break;
+                        case 'eficiencia':
+                            createPautaComparativeChart(currentMonth);
+                            createEficienciaSucursalChart(currentMonth);
+                            createCostoPorClienteChart(currentMonth);
+                            break;
+                        case 'geografico':
+                            createGeograficoChart(currentMonth);
+                            createPerformanceRegionChart(currentMonth);
+                            createPenetracionChart(currentMonth);
+                            break;
+                        case 'clientes':
+                            createCanalesChart(currentMonth);
+                            createDistribucionMontosChart(currentMonth);
+                            createEficienciaCanalChart(currentMonth);
+                            break;
+                        case 'detalle':
+                            createRankingChart(currentMonth);
+                            break;
                     }
                 } catch (error) {
-                    console.log('Control button error:', error);
+                    console.log('Error in chart initialization:', error);
                 }
+            }, 300);
+        }
+
+        // ========================================
+        // EVENT LISTENERS
+        // ========================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Month selector
+            document.querySelectorAll('.month-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const month = this.dataset.month;
+                    changeMonth(month);
+                });
+            });
+
+            // Tab functionality
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // Update tab buttons
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update tab content
+                    document.querySelectorAll('.tab-content').forEach(content => {
+                        content.classList.remove('active');
+                    });
+                    document.getElementById(targetTab).classList.add('active');
+                    
+                    // Initialize charts for the active tab
+                    initializeChartsForTab(targetTab);
+                });
+            });
+
+            // Initialize with current month data
+            changeMonth(currentMonth);
+            
+            // Add entrance animations
+            const cards = document.querySelectorAll('.card, .kpi-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
             });
         });
     </script>
