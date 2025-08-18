@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,7 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Desembolsos vs Gastos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <!-- Leaflet CSS y JS para el mapa -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" 
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <style>
+
+
         * {
             margin: 0;
             padding: 0;
@@ -323,6 +332,8 @@
             height: 350px;
         }
 
+
+
         /* Table Styles */
         .data-table {
             width: 100%;
@@ -451,22 +462,102 @@
                 flex-direction: column;
             }
         }
+
+        /* Estilos para el mapa de Leaflet */
+.leaflet-container {
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(255, 107, 53, 0.1);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    width: 100% !important;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.number-marker {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #ff6b35, #ffa366);
+    border: 3px solid #fff;
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+    font-weight: 800;
+    font-size: 18px;
+    color: white;
+    user-select: none;
+    transition: all 0.3s ease;
+}
+
+.leaflet-tooltip.custom-tooltip {
+    background: linear-gradient(135deg, #1f2937, #374151);
+    color: white;
+    border: 1px solid rgba(255, 107, 53, 0.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 20px 25px rgba(0, 0, 0, 0.2);
+    font-size: 13px;
+    min-width: 200px;
+}
+
+.tooltip-title {
+    font-weight: bold;
+    font-size: 14px;
+    color: #ff6b35;
+    margin-bottom: 8px;
+}
+
+.tooltip-item {
+    margin-bottom: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tooltip-value.green { color: #22c55e; }
+.tooltip-value.blue { color: #3b82f6; }
+.tooltip-value.orange { color: #f59e0b; }
+
+.map-wrapper {
+    position: relative;
+    height: 600px;
+    width: 100%;
+    overflow: hidden;
+}
     </style>
 </head>
 <body>
     <div class="dashboard-container">
         <!-- Month Selector -->
-        <div class="month-selector">
-            <button class="month-btn" data-month="junio">
-                <span>📅</span>
-                Junio 2025
-            </button>
-            <button class="month-btn active" data-month="julio">
-                <span>📅</span>
-                Julio 2025
-            </button>
-        </div>
-
+<div class="month-selector">
+    <button class="month-btn active" data-month="enero">
+        <span>📅</span>
+        Enero 2025
+    </button>
+    <button class="month-btn" data-month="febrero">
+        <span>📅</span>
+        Febrero 2025
+    </button>
+    <button class="month-btn" data-month="marzo">
+        <span>📅</span>
+        Marzo 2025
+    </button>
+    <button class="month-btn" data-month="abril">
+        <span>📅</span>
+        Abril 2025
+    </button>
+    <button class="month-btn" data-month="mayo">
+        <span>📅</span>
+        Mayo 2025
+    </button>
+    <button class="month-btn" data-month="junio">
+        <span>📅</span>
+        Junio 2025
+    </button>
+    <button class="month-btn" data-month="julio">
+        <span>📅</span>
+        Julio 2025
+    </button>
+</div>
         <!-- Header -->
         <div class="header">
             <div class="header-content">
@@ -499,12 +590,18 @@
         </div>
 
         <!-- Tab Navigation -->
-        <div class="tab-navigation">
-            <button class="tab-btn active" data-tab="overview">
-                <span class="tab-icon">📊</span>
-                Resumen General
-            </button>
-            <button class="tab-btn" data-tab="eficiencia">
+<div class="tab-navigation">
+       <button class="tab-btn" data-tab="anual">
+        <span class="tab-icon">📈</span>
+        Vista Anual
+    </button>
+    <button class="tab-btn active" data-tab="overview">
+        <span class="tab-icon">📊</span>
+        Resumen General
+    </button>
+ 
+
+    <button class="tab-btn" data-tab="eficiencia">
                 <span class="tab-icon">⚡</span>
                 Eficiencia de Pauta
             </button>
@@ -521,7 +618,104 @@
                 Reporte Detallado
             </button>
         </div>
+<!-- Vista Anual Tab -->
+<div class="tab-content" id="anual">
+    <div class="overview-grid">
+        <div class="kpis-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">📅</div>
+                <div class="kpi-value" id="anual-total-desembolso">Q47.1M</div>
+                <div class="kpi-label">Total Año 2025</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #06b6d4, #67e8f9);">🎯</div>
+                <div class="kpi-value" id="anual-total-casos">309</div>
+                <div class="kpi-label">Total Casos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">📈</div>
+                <div class="kpi-value" id="anual-mejor-mes">MARZO</div>
+                <div class="kpi-label">Mejor Mes</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">💰</div>
+                <div class="kpi-value" id="anual-promedio-mes">Q6.7M</div>
+                <div class="kpi-label">Promedio Mensual</div>
+            </div>
+        </div>
 
+        <div class="charts-main">
+            <div class="card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Evolución Mensual de Desembolsos</h3>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="evolucionDesembolsosChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-box">
+            <h3 class="summary-title">📊 Resumen Anual 2025</h3>
+            <div class="summary-item">
+                <span>Crecimiento vs Ene</span>
+                <strong id="anual-crecimiento">+33%</strong>
+            </div>
+            <div class="summary-item">
+                <span>Sucursales Nuevas</span>
+                <strong id="anual-sucursales-nuevas">3 (Jun-Jul)</strong>
+            </div>
+            <div class="summary-item">
+                <span>Mes Más Productivo</span>
+                <strong id="anual-mes-productivo">Junio (40 casos)</strong>
+            </div>
+            <div class="summary-item">
+                <span>Tendencia General</span>
+                <strong id="anual-tendencia">🔥 Crecimiento</strong>
+            </div>
+        </div>
+    </div>
+
+    <div class="financial-grid" style="margin-top: 2rem;">
+        <div class="card">
+            <div class="chart-header">
+                <h3 class="chart-title">Casos por Mes</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="casosPorMesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="chart-header">
+                <h3 class="chart-title">Performance por Sucursal (Acumulado)</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="performanceSucursalAnualChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="financial-grid" style="margin-top: 2rem;">
+        <div class="card">
+            <div class="chart-header">
+                <h3 class="chart-title">Evolución de Canales Digitales</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="evolucionCanalesChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="chart-header">
+                <h3 class="chart-title">Distribución Trimestral</h3>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="distribucionTrimestralChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
         <!-- Tab Contents -->
         
         <!-- Overview Tab -->
@@ -603,10 +797,10 @@
                         <div class="kpi-label">Costo por Cliente</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">📈</div>
-                        <div class="kpi-value" id="kpi-eficiencia-conversion">18.9%</div>
-                        <div class="kpi-label">Tasa de Conversión</div>
-                    </div>
+    <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">📱</div>
+    <div class="kpi-value" id="kpi-eficiencia-digital">70%</div>
+    <div class="kpi-label">Participación Digital</div>
+</div>
                 </div>
 
                 <div class="charts-main">
@@ -661,7 +855,7 @@
                 </div>
             </div>
 
-            <div class="card" style="margin-top: 2rem;">
+<div class="card" style="margin-bottom: 2rem; padding: 3rem;">
                 <h3 class="chart-title">⚡ Análisis de Eficiencia por Sucursal</h3>
                 <table class="data-table" id="eficiencia-table">
                     <!-- Dynamic content -->
@@ -725,8 +919,17 @@
                         <strong id="geo-summary-occidente">Q200K (2.4%)</strong>
                     </div>
                 </div>
+              
             </div>
 
+  <div class="card">
+    <div class="chart-header">
+        <h3 class="chart-title">🗺️ Mapa Interactivo de Guatemala</h3>
+    </div>
+<div class="map-wrapper">
+    <div id="guatemalaMap" style="width: 100%; height: 700px; max-width: 100%; overflow: hidden;"></div>
+</div>
+</div>
             <div class="financial-grid" style="margin-top: 2rem;">
                 <div class="card">
                     <div class="chart-header">
@@ -758,15 +961,15 @@
                         <div class="kpi-label">Clientes Únicos</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, #ff6b35, #ffa366);">📱</div>
-                        <div class="kpi-value" id="clientes-social">40</div>
-                        <div class="kpi-label">Vía Social Media</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">🏢</div>
-                        <div class="kpi-value" id="clientes-presencial">14</div>
-                        <div class="kpi-label">Visitas Presenciales</div>
-                    </div>
+    <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981, #34d399);">🆕</div>
+    <div class="kpi-value" id="clientes-nuevos">31</div>
+    <div class="kpi-label">Casos Nuevos</div>
+</div>
+<div class="kpi-card">
+    <div class="kpi-icon" style="background: linear-gradient(135deg, #ff6b35, #ffa366);">🏆</div>
+    <div class="kpi-value" id="clientes-lider">CENTRAL</div>
+    <div class="kpi-label">Mejor Sucursal</div>
+</div>
                     <div class="kpi-card">
                         <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">💰</div>
                         <div class="kpi-value" id="clientes-ticket">Q137K</div>
@@ -800,9 +1003,9 @@
                         <strong id="clientes-summary-canal">Social Manager</strong>
                     </div>
                     <div class="summary-item">
-                        <span>Tasa Conversión</span>
-                        <strong id="clientes-summary-conversion">89.5%</strong>
-                    </div>
+    <span>Participación Digital</span>
+    <strong id="clientes-summary-digital">70.0%</strong>
+</div>
                 </div>
             </div>
 
@@ -900,66 +1103,204 @@
         // ========================================
         
         const monthlyData = {
+            enero: {
+    general: {
+        totalDesembolsado: 5.892, // 5,892,000 = 5.892 millones
+        totalCasos: 46,
+        totalInversionPauta: 0, // Sin datos de pauta en enero
+        retornoPromedio: 0, // No se puede calcular sin pauta
+        promedioPorCaso: 128 // 5,892,000 / 46 = 128,086
+    },
+    sucursales: {
+        labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+        desembolsos: [2.645, 0, 0.190, 0.980, 0, 0], // en millones
+        casos: [33, 0, 2, 11, 0, 0],
+        gastosPauta: [0, 0, 0, 0, 0, 0], // Sin datos de pauta
+        roi: [0, 0, 0, 0, 0, 0], // No se puede calcular sin pauta
+        costoXCaso: [0, 0, 0, 0, 0, 0] // No se puede calcular sin pauta
+    },
+    tipos: {
+        labels: ['NUEVO', 'AMPLIACION'],
+        casos: [40, 6], // 40 nuevos, 6 ampliaciones
+        montos: [5.372, 0.520] // Estimado proporcional
+    },
+    clientes: {
+        canales: ['Social Manager', 'PBX', 'Freelance', 'Facebook'],
+        casos: [33, 7, 3, 3],
+        promedios: [179, 378, 883, 327] // Estimados basados en casos y montos
+    }
+},
+febrero: {
+    general: {
+        totalDesembolsado: 4.187, // 4,187,000 = 4.187 millones
+        totalCasos: 44,
+        totalInversionPauta: 0, // Sin datos de pauta en febrero
+        retornoPromedio: 0, // No se puede calcular sin pauta
+        promedioPorCaso: 95 // 4,187,000 / 44 = 95,159
+    },
+    sucursales: {
+        labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+        desembolsos: [2.977, 0, 0.460, 0.750, 0, 0], // en millones
+        casos: [28, 0, 5, 11, 0, 0],
+        gastosPauta: [0, 0, 0, 0, 0, 0], // Sin datos de pauta
+        roi: [0, 0, 0, 0, 0, 0], // No se puede calcular sin pauta
+        costoXCaso: [0, 0, 0, 0, 0, 0] // No se puede calcular sin pauta
+    },
+    tipos: {
+        labels: ['NUEVO', 'AMPLIACION'],
+        casos: [36, 8], // 36 nuevos, 8 ampliaciones
+        montos: [3.425, 0.762] // Proporcional: 36/44 * 4.187 y 8/44 * 4.187
+    },
+    clientes: {
+        canales: ['Social Manager', 'PBX', 'Visita Oficina', 'Facebook'],
+        casos: [34, 6, 2, 2],
+        promedios: [106, 92, 68, 125] // Estimados basados en casos y distribución
+    }
+},
+marzo: {
+    general: {
+        totalDesembolsado: 8.310, // 8,310,000 = 8.310 millones
+        totalCasos: 57,
+        totalInversionPauta: 0, // Sin datos de pauta en marzo
+        retornoPromedio: 0, // No se puede calcular sin pauta
+        promedioPorCaso: 146 // 8,310,000 / 57 = 145,789
+    },
+    sucursales: {
+        labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+        desembolsos: [7.500, 0, 0.455, 0.355, 0, 0], // en millones
+        casos: [44, 0, 6, 7, 0, 0],
+        gastosPauta: [0, 0, 0, 0, 0, 0], // Sin datos de pauta
+        roi: [0, 0, 0, 0, 0, 0], // No se puede calcular sin pauta
+        costoXCaso: [0, 0, 0, 0, 0, 0] // No se puede calcular sin pauta
+    },
+    tipos: {
+        labels: ['NUEVO', 'AMPLIACION'],
+        casos: [42, 15], // 42 nuevos, 15 ampliaciones
+        montos: [6.126, 2.184] // Proporcional: 42/57 * 8.31 y 15/57 * 8.31
+    },
+    clientes: {
+        canales: ['Social Manager', 'PBX', 'Freelance', 'Facebook/Web', 'Visita Oficina'],
+        casos: [42, 7, 3, 3, 2],
+        promedios: [145, 152, 185, 138, 125] // Estimados basados en casos y distribución
+    }
+},
+abril: {
+    general: {
+        totalDesembolsado: 6.230, // Asumiendo suma de sucursales
+        totalCasos: 53,
+        totalInversionPauta: 0, // Sin datos de pauta en abril
+        retornoPromedio: 0, // No se puede calcular sin pauta
+        promedioPorCaso: 118 // 6,230,000 / 53 = 117,547
+    },
+    sucursales: {
+        labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+        desembolsos: [5.280, 0, 0.480, 0.470, 0, 0], // en millones
+        casos: [39, 0, 8, 6, 0, 0],
+        gastosPauta: [0, 0, 0, 0, 0, 0], // Sin datos de pauta
+        roi: [0, 0, 0, 0, 0, 0], // No se puede calcular sin pauta
+        costoXCaso: [0, 0, 0, 0, 0, 0] // No se puede calcular sin pauta
+    },
+    tipos: {
+        labels: ['NUEVO', 'AMPLIACION'],
+        casos: [41, 12], // 41 nuevos, 12 ampliaciones
+        montos: [4.819, 1.411] // Proporcional: 41/53 * 6.23 y 12/53 * 6.23
+    },
+    clientes: {
+        canales: ['Social Manager', 'Freelance', 'Facebook', 'PBX', 'Visita Oficina', 'Radio', 'Sitio Web'],
+        casos: [42, 4, 2, 2, 1, 1, 1],
+        promedios: [122, 185, 156, 117, 135, 105, 94] // Estimados
+    }
+},
+mayo: {
+    general: {
+        totalDesembolsado: 6.448, // 6,448,000 = 6.448 millones
+        totalCasos: 49,
+        totalInversionPauta: 0, // Sin datos de pauta en mayo
+        retornoPromedio: 0, // No se puede calcular sin pauta
+        promedioPorCaso: 132 // 6,448,000 / 49 = 131,591
+    },
+    sucursales: {
+        labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+        desembolsos: [5.293, 0, 0.320, 0.835, 0, 0], // en millones
+        casos: [36, 0, 5, 8, 0, 0],
+        gastosPauta: [0, 0, 0, 0, 0, 0], // Sin datos de pauta
+        roi: [0, 0, 0, 0, 0, 0], // No se puede calcular sin pauta
+        costoXCaso: [0, 0, 0, 0, 0, 0] // No se puede calcular sin pauta
+    },
+    tipos: {
+        labels: ['NUEVO', 'AMPLIACION'],
+        casos: [38, 11], // 38 nuevos, 11 ampliaciones
+        montos: [4.993, 1.455] // Proporcional: 38/49 * 6.448 y 11/49 * 6.448
+    },
+    clientes: {
+        canales: ['Social Manager', 'PBX', 'Visita Oficina', 'Sitio Web', 'Facebook'],
+        casos: [41, 3, 2, 2, 1],
+        promedios: [128, 143, 161, 107, 147] // Estimados basados en distribución
+    }
+},
             junio: {
                 // Datos de ejemplo para junio - REEMPLAZAR con datos reales del Excel
                 general: {
-                    totalDesembolsado: 6.8, // Millones
-                    totalCasos: 45,
-                    totalInversionPauta: 245.5, // Miles
-                    retornoPromedio: 27.7,
-                    promedioPorCaso: 151
-                },
+    totalDesembolsado: 8.9, // Millones
+    totalCasos: 40,
+    totalInversionPauta: 258, // Miles
+    retornoPromedio: 34.5,
+    promedioPorCaso: 222
+},
                 sucursales: {
-                    labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
-                    desembolsos: [3.8, 1.2, 0.9, 0.45, 0.35, 0.1],
-                    casos: [22, 5, 8, 6, 3, 1],
-                    gastosPauta: [125.5, 25.0, 28.5, 30.0, 26.5, 10.0],
-                    roi: [3024, 4800, 3157, 1500, 1320, 1000],
-                    costoXCaso: [5704, 5000, 3562, 5000, 8833, 10000]
-                },
-                tipos: {
-                    labels: ['NUEVO', 'AMPLIACION'],
-                    casos: [30, 15],
-                    montos: [5.2, 1.6]
-                },
-                clientes: {
-                    canales: ['Social Manager', 'Visita Oficina', 'Correo Electrónico', 'Otros'],
-                    casos: [28, 12, 3, 2],
-                    promedios: [145, 160, 120, 95]
-                }
+    labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+    desembolsos: [7.405, 0.570, 0.435, 0.490, 0, 0],
+    casos: [27, 3, 5, 5, 0, 0],
+    gastosPauta: [170.651, 13.934, 38.764, 34.613, 0, 0],
+    roi: [4340, 4091, 1122, 1416, 0, 0],
+    costoXCaso: [6320, 4645, 7753, 6923, 0, 0]
+},
+               tipos: {
+    labels: ['NUEVO', 'AMPLIACION'],
+    casos: [31, 9],
+    montos: [7.12, 1.78]
+},
+              clientes: {
+    canales: ['Social Manager', 'Visita Oficina', 'PBX', 'Radio/Facebook/IA/Freelance'],
+    casos: [27, 4, 4, 5],
+    promedios: [220, 245, 200, 180]
+}
             },
-            julio: {
-                // Datos originales de julio
-                general: {
-                    totalDesembolsado: 8.2,
-                    totalCasos: 60,
-                    totalInversionPauta: 302,
-                    retornoPromedio: 27.2,
-                    promedioPorCaso: 137
-                },
-                sucursales: {
-                    labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
-                    desembolsos: [4.93, 1.38, 0.97, 0.39, 0.335, 0.20],
-                    casos: [28, 6, 10, 7, 4, 2],
-                    gastosPauta: [157.289, 28.280, 30.335, 31.448, 28.169, 26.086],
-                    roi: [3135, 4882, 3197, 1240, 1189, 767],
-                    costoXCaso: [5617, 4713, 3034, 4493, 7042, 13043]
-                },
-                tipos: {
-                    labels: ['NUEVO', 'AMPLIACION'],
-                    casos: [40, 20],
-                    montos: [6.5, 1.7]
-                },
-                clientes: {
-                    canales: ['Social Manager', 'Visita Oficina', 'Correo Electrónico', 'Otros'],
-                    casos: [40, 14, 4, 2],
-                    promedios: [142, 155, 125, 100]
-                }
-            }
+
+            
+       julio: {
+    // Datos reales de julio 2025
+    general: {
+        totalDesembolsado: 7.817,
+        totalCasos: 60,
+        totalInversionPauta: 397,
+        retornoPromedio: 19.7,
+        promedioPorCaso: 130
+    },
+    sucursales: {
+        labels: ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'],
+        desembolsos: [4.642, 1.380, 0.970, 0.390, 0.335, 0.100],
+        casos: [32, 6, 10, 7, 4, 1],
+        gastosPauta: [158.115, 49.064, 47.378, 52.991, 46.709, 43.129],
+        roi: [2940, 2813, 2047, 736, 717, 232],
+        costoXCaso: [4941, 8177, 4738, 7570, 11677, 43129]
+    },
+    tipos: {
+        labels: ['NUEVO', 'AMPLIACION'],
+        casos: [44, 16],
+        montos: [6.0, 1.817]
+    },
+    clientes: {
+        canales: ['Social Manager', 'Visita Oficina', 'PBX', 'Correo/Facebook/IA/Web'],
+        casos: [39, 9, 4, 8],
+        promedios: [135, 145, 120, 110]
+    }
+}
         };
 
         // Variables globales
-        let currentMonth = 'julio';
+
+let currentMonth = 'enero';
         let chartInstances = {};
 
         // ========================================
@@ -982,8 +1323,16 @@
         
         function updateHeaderStats(month) {
             const data = monthlyData[month];
-            document.getElementById('current-month').textContent = 
-                month === 'julio' ? 'Julio 2025' : 'Junio 2025';
+const monthNames = {
+    'enero': 'Enero 2025',
+    'febrero': 'Febrero 2025', 
+    'marzo': 'Marzo 2025',
+    'abril': 'Abril 2025',
+    'mayo': 'Mayo 2025',
+    'junio': 'Junio 2025',
+    'julio': 'Julio 2025'
+};
+document.getElementById('current-month').textContent = monthNames[month];
             document.getElementById('stat-desembolsado').textContent = `Q${data.general.totalDesembolsado}M`;
             document.getElementById('stat-casos').textContent = data.general.totalCasos;
             document.getElementById('stat-inversion').textContent = `Q${data.general.totalInversionPauta}K`;
@@ -1000,8 +1349,16 @@
 
         function updateSummaryBoxes(month) {
             const data = monthlyData[month];
-            const monthName = month === 'julio' ? 'Julio' : 'Junio';
-            
+const monthNameShort = {
+    'enero': 'Enero',
+    'febrero': 'Febrero',
+    'marzo': 'Marzo', 
+    'abril': 'Abril',
+    'mayo': 'Mayo',
+    'junio': 'Junio',
+    'julio': 'Julio'
+};
+const monthName = monthNameShort[month];            
             document.getElementById('summary-title').textContent = `📊 Resumen ${monthName} 2025`;
             
             const nuevosPercent = ((data.tipos.casos[0] / data.general.totalCasos) * 100).toFixed(1);
@@ -1048,6 +1405,7 @@
             document.getElementById('geo-summary-norte').textContent = `Q${data.sucursales.desembolsos[1]}M (${nortePercent}%)`;
             document.getElementById('geo-summary-sur').textContent = `Q${data.sucursales.desembolsos[2]}M (${surPercent}%)`;
             document.getElementById('geo-summary-occidente').textContent = `Q${(data.sucursales.desembolsos[5] * 1000).toFixed(0)}K (${occidentePercent}%)`;
+
         }
 
         function updateClientesKPIs(month) {
@@ -1061,9 +1419,13 @@
             const ticketPromedio = (data.general.totalDesembolsado * 1000000 / totalClientes / 1000).toFixed(0);
             
             document.getElementById('clientes-unicos').textContent = totalClientes;
-            document.getElementById('clientes-social').textContent = socialMediaClientes;
-            document.getElementById('clientes-presencial').textContent = presencialClientes;
-            document.getElementById('clientes-ticket').textContent = `Q${ticketPromedio}K`;
+document.getElementById('clientes-nuevos').textContent = data.tipos.casos[0];
+            
+// Encontrar mejor sucursal (mayor desembolso)
+const maxIndex = data.sucursales.desembolsos.indexOf(Math.max(...data.sucursales.desembolsos));
+const mejorSucursal = data.sucursales.labels[maxIndex];
+document.getElementById('clientes-lider').textContent = mejorSucursal;
+document.getElementById('clientes-ticket').textContent = `Q${ticketPromedio}K`;
             
             // Actualizar resumen de clientes
             const nuevosPercent = ((data.tipos.casos[0] / totalClientes) * 100).toFixed(1);
@@ -1072,8 +1434,7 @@
             
             document.getElementById('clientes-summary-nuevos').textContent = `${data.tipos.casos[0]} (${nuevosPercent}%)`;
             document.getElementById('clientes-summary-ampliaciones').textContent = `${data.tipos.casos[1]} (${ampliacionesPercent}%)`;
-            document.getElementById('clientes-summary-canal').textContent = data.clientes.canales[0];
-            document.getElementById('clientes-summary-conversion').textContent = `${socialPercent}%`;
+document.getElementById('clientes-summary-digital').textContent = `${socialPercent}% (Social Manager)`;
         }
 
         function updateMetricasDetalle(month) {
@@ -1111,8 +1472,9 @@
             const costoPromedio = data.general.totalInversionPauta * 1000 / data.general.totalCasos;
             document.getElementById('kpi-eficiencia-costo').textContent = `Q${(costoPromedio/1000).toFixed(1)}K`;
             
-            // Tasa de conversión aproximada
-            document.getElementById('kpi-eficiencia-conversion').textContent = '18.9%';
+          // Participación digital (casos vía Social Manager)
+const participacionDigital = ((data.clientes.casos[0] / data.general.totalCasos) * 100).toFixed(1);
+document.getElementById('kpi-eficiencia-digital').innerHTML = participacionDigital + '%<span style="font-size: 0.5em; vertical-align: super; color: #64748b;">SM</span>';
             
             // Actualizar summary box de eficiencia
             const totalInversion = data.general.totalInversionPauta * 1000;
@@ -1238,7 +1600,7 @@
             detalleTable.innerHTML = detalleHTML;
             
             // Actualizar título de detalle
-            const monthName = month === 'julio' ? 'Julio' : 'Junio';
+const monthName = monthNameShort[month];   
             document.getElementById('detalle-title').textContent = `📊 Reporte Ejecutivo Completo - ${monthName} 2025`;
         }
 
@@ -1300,68 +1662,77 @@
             });
         }
 
-        function createPautaComparativeChart(month) {
-            destroyChart('pautaComparative');
-            const ctx = document.getElementById('pautaComparativeChart');
-            if (!ctx) return;
-            
-            const data = monthlyData[month];
-            chartInstances['pautaComparative'] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: data.sucursales.labels,
-                    datasets: [{
-                        label: 'Desembolsos (Millones Q)',
-                        data: data.sucursales.desembolsos,
-                        backgroundColor: brandColors.success + '80',
-                        borderColor: brandColors.success,
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        yAxisID: 'y'
-                    }, {
-                        label: 'Gastos Pauta (Miles Q)',
-                        data: data.sucursales.gastosPauta.map(g => g/1000),
-                        backgroundColor: brandColors.error + '80',
-                        borderColor: brandColors.error,
-                        borderWidth: 2,
-                        borderRadius: 8,
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' }
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: { display: true, text: 'Desembolsos (Millones Q)' },
-                            ticks: {
-                                callback: function(value) {
-                                    return 'Q' + value + 'M';
+function createPautaComparativeChart(month) {
+    destroyChart('pautaComparative');
+    const ctx = document.getElementById('pautaComparativeChart');
+    if (!ctx) return;
+    
+    const data = monthlyData[month];
+    // Factor de escala para hacer visibles los gastos de pauta
+    const factorEscala = 12;
+    
+    chartInstances['pautaComparative'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.sucursales.labels,
+            datasets: [{
+                label: 'Desembolsos',
+                data: data.sucursales.desembolsos,
+                backgroundColor: brandColors.success + '80',
+                borderColor: brandColors.success,
+                borderWidth: 2,
+                borderRadius: 8
+            }, {
+                label: 'Gastos Pauta',
+                data: data.sucursales.gastosPauta.map(g => (g/1000) * factorEscala),
+                backgroundColor: brandColors.error + '80',
+                borderColor: brandColors.error,
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            if (context.datasetIndex === 0) {
+                                const valor = context.parsed.y;
+                                if (valor >= 1) {
+                                    return `Desembolsos: Q${valor}M`;
+                                } else {
+                                    return `Desembolsos: Q${(valor * 1000).toFixed(0)}K`;
                                 }
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: { display: true, text: 'Gastos Pauta (Miles Q)' },
-                            grid: { drawOnChartArea: false },
-                            ticks: {
-                                callback: function(value) {
-                                    return 'Q' + value + 'K';
-                                }
+                            } else {
+                                const valorReal = context.parsed.y / factorEscala;
+                                return `Gastos Pauta: Q${(valorReal * 1000).toFixed(0)}K`;
                             }
                         }
                     }
                 }
-            });
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Escala Ajustada' },
+                    ticks: {
+                        callback: function(value) {
+                            if (value >= 1) {
+                                return 'Q' + value + 'M';
+                            } else if (value > 0) {
+                                return 'Q' + (value * 1000).toFixed(0) + 'K';
+                            }
+                            return 'Q0';
+                        }
+                    }
+                }
+            }
         }
+    });
+}
 
         function createEficienciaSucursalChart(month) {
             destroyChart('eficienciaSucursal');
@@ -1796,61 +2167,473 @@
             });
         }
 
+// ========================================
+// FUNCIONES DE GRÁFICOS ANUALES
+// ========================================
+
+function createEvolucionDesembolsosChart() {
+    destroyChart('evolucionDesembolsos');
+    const ctx = document.getElementById('evolucionDesembolsosChart');
+    if (!ctx) return;
+    
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'];
+    const mesKeys = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio'];
+    const desembolsos = mesKeys.map(mes => monthlyData[mes].general.totalDesembolsado);
+    
+    chartInstances['evolucionDesembolsos'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Desembolsos (Millones Q)',
+                data: desembolsos,
+                borderColor: brandColors.primary,
+                backgroundColor: brandColors.primary + '20',
+                borderWidth: 4,
+                pointRadius: 8,
+                pointBackgroundColor: brandColors.primary,
+                pointBorderColor: '#fff',
+                pointBorderWidth: 3,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: Q${context.parsed.y.toFixed(1)}M`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Desembolsos (Millones Q)' },
+                    ticks: {
+                        callback: function(value) {
+                            return 'Q' + value + 'M';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createCasosPorMesChart() {
+    destroyChart('casosPorMes');
+    const ctx = document.getElementById('casosPorMesChart');
+    if (!ctx) return;
+    
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'];
+    const mesKeys = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio'];
+    const casos = mesKeys.map(mes => monthlyData[mes].general.totalCasos);
+    
+    chartInstances['casosPorMes'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Número de Casos',
+                data: casos,
+                backgroundColor: casos.map(caso => {
+                    if (caso >= 55) return brandColors.success + '80';
+                    if (caso >= 45) return brandColors.warning + '80';
+                    return brandColors.info + '80';
+                }),
+                borderColor: casos.map(caso => {
+                    if (caso >= 55) return brandColors.success;
+                    if (caso >= 45) return brandColors.warning;
+                    return brandColors.info;
+                }),
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.parsed.y} casos`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Número de Casos' }
+                }
+            }
+        }
+    });
+}
+
+function createPerformanceSucursalAnualChart() {
+    destroyChart('performanceSucursalAnual');
+    const ctx = document.getElementById('performanceSucursalAnualChart');
+    if (!ctx) return;
+    
+    // Calcular totales acumulados por sucursal
+    const sucursales = ['CENTRAL', 'PETÉN', 'ESCUINTLA', 'COBÁN', 'MAZATENANGO', '4 CAMINOS'];
+    const mesKeys = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio'];
+    
+    const totales = sucursales.map(sucursal => {
+        return mesKeys.reduce((total, mes) => {
+            const index = monthlyData[mes].sucursales.labels.indexOf(sucursal);
+            return total + (index !== -1 ? monthlyData[mes].sucursales.desembolsos[index] : 0);
+        }, 0);
+    });
+    
+    chartInstances['performanceSucursalAnual'] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: sucursales,
+            datasets: [{
+                data: totales,
+                backgroundColor: [
+                    '#ff6b35', '#ffa366', '#ff8c42', 
+                    '#ffb366', '#ff9f59', '#ffcc99'
+                ],
+                borderWidth: 4,
+                borderColor: '#fff',
+                hoverOffset: 15
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '50%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { padding: 15, font: { size: 10 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((context.parsed / total) * 100).toFixed(1);
+                            return `${context.label}: Q${context.parsed.toFixed(1)}M (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createEvolucionCanalesChart() {
+    destroyChart('evolucionCanales');
+    const ctx = document.getElementById('evolucionCanalesChart');
+    if (!ctx) return;
+    
+    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'];
+    const mesKeys = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio'];
+    
+    // Calcular casos de Social Manager por mes
+    const socialManager = mesKeys.map(mes => {
+        const data = monthlyData[mes];
+        const smIndex = data.clientes.canales.indexOf('Social Manager');
+        return smIndex !== -1 ? data.clientes.casos[smIndex] : 0;
+    });
+    
+    chartInstances['evolucionCanales'] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: meses,
+            datasets: [{
+                label: 'Social Manager',
+                data: socialManager,
+                borderColor: brandColors.primary,
+                backgroundColor: brandColors.primary + '20',
+                borderWidth: 3,
+                pointRadius: 6,
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Casos por Canal' }
+                }
+            }
+        }
+    });
+}
+
+function createDistribucionTrimestralChart() {
+    destroyChart('distribucionTrimestral');
+    const ctx = document.getElementById('distribucionTrimestralChart');
+    if (!ctx) return;
+    
+    // Agrupar por trimestres
+    const q1 = monthlyData.enero.general.totalDesembolsado + 
+              monthlyData.febrero.general.totalDesembolsado + 
+              monthlyData.marzo.general.totalDesembolsado;
+              
+    const q2 = monthlyData.abril.general.totalDesembolsado + 
+              monthlyData.mayo.general.totalDesembolsado + 
+              monthlyData.junio.general.totalDesembolsado;
+              
+    const q3 = monthlyData.julio.general.totalDesembolsado; // Solo julio hasta ahora
+    
+    chartInstances['distribucionTrimestral'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Q1 2025', 'Q2 2025', 'Q3 2025 (Parcial)'],
+            datasets: [{
+                label: 'Desembolsos Trimestrales',
+                data: [q1, q2, q3],
+                backgroundColor: [
+                    brandColors.success + '80',
+                    brandColors.primary + '80',
+                    brandColors.warning + '80'
+                ],
+                borderColor: [
+                    brandColors.success,
+                    brandColors.primary,
+                    brandColors.warning
+                ],
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: Q${context.parsed.y.toFixed(1)}M`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Desembolsos (Millones Q)' },
+                    ticks: {
+                        callback: function(value) {
+                            return 'Q' + value + 'M';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+        function createGuatemalaMap(month) {
+    const data = monthlyData[month];
+    
+    if (window.guatemalaMapInstance) {
+        window.guatemalaMapInstance.remove();
+    }
+    
+// Crear ranking por desembolsos
+const sucursalData = data.sucursales.labels.map((label, index) => ({
+    nombre: label,
+    desembolso: data.sucursales.desembolsos[index],
+    casos: data.sucursales.casos[index],
+    pauta: data.sucursales.gastosPauta[index],
+    index: index
+}));
+
+// Ordenar por desembolsos (mayor a menor)
+sucursalData.sort((a, b) => b.desembolso - a.desembolso);
+
+// Asignar coordenadas
+const coordenadas = {
+    "PETÉN": { lat: 16.500, lng: -89.900 },
+    "COBÁN": { lat: 15.469, lng: -90.379 },
+    "CENTRAL": { lat: 14.6349, lng: -90.5069 },
+    "ESCUINTLA": { lat: 14.150, lng: -90.900 },
+    "MAZATENANGO": { lat: 14.534, lng: -91.503 },
+    "4 CAMINOS": { lat: 14.881, lng: -91.682 }
+};
+
+const AREAS = sucursalData.map((sucursal, rankIndex) => ({
+    id: rankIndex + 1, // El ranking (1 = mayor desembolso)
+    nombre: sucursal.nombre,
+    sucursal: sucursal.nombre,
+    lat: coordenadas[sucursal.nombre].lat,
+    lng: coordenadas[sucursal.nombre].lng,
+    desembolso: sucursal.desembolso,
+    casos: sucursal.casos,
+    pauta: sucursal.pauta
+}));
+    
+const map = L.map('guatemalaMap', { 
+    zoomControl: true, 
+    minZoom: 7, 
+    maxZoom: 12,
+    scrollWheelZoom: true
+});
+    
+    window.guatemalaMapInstance = map;
+    // Forzar que el mapa se ajuste al contenedor
+setTimeout(() => {
+    map.invalidateSize();
+}, 100);
+map.setView([15.3, -90.2], 6);
+
+const guateBounds = L.latLngBounds([
+    [13.7, -92.3], [17.8, -88.2]
+]);
+map.fitBounds(guateBounds, { padding: [30, 30] });
+map.setZoom(7.4);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    
+AREAS.forEach(area => {
+    const desembolso = area.desembolso;
+    const casos = area.casos;
+    const pauta = area.pauta;
+        
+        const icon = L.divIcon({
+            className: 'number-marker',
+            html: String(area.id),
+            iconSize: [50, 50],
+            iconAnchor: [25, 25],
+        });
+        
+        const marker = L.marker([area.lat, area.lng], { icon }).addTo(map);
+        
+        const desembolsoText = desembolso >= 1 ? 
+            `Q${desembolso.toFixed(1)}M` : 
+            `Q${(desembolso * 1000).toFixed(0)}K`;
+        
+        const tooltipContent = `
+            <div class="tooltip-title">${area.nombre}</div>
+            <div class="tooltip-item">
+                <span>💰 Desembolsos:</span>
+                <span class="tooltip-value green">${desembolsoText}</span>
+            </div>
+            <div class="tooltip-item">
+                <span>👥 Casos:</span>
+                <span class="tooltip-value blue">${casos}</span>
+            </div>
+            <div class="tooltip-item">
+                <span>📊 Pauta:</span>
+                <span class="tooltip-value orange">Q${pauta.toFixed(0)}K</span>
+            </div>
+        `;
+        
+        marker.bindTooltip(tooltipContent, {
+            direction: 'top',
+            offset: [0, -30],
+            className: 'custom-tooltip',
+            sticky: true
+        });
+    });
+}
+
+        
+
+        
+
+        
+
+        
+
         // ========================================
         // FUNCIÓN PRINCIPAL DE CAMBIO DE MES
         // ========================================
         
-        function changeMonth(month) {
-            currentMonth = month;
-            
-            // Actualizar UI
-            updateHeaderStats(month);
-            updateKPIs(month);
-            updateSummaryBoxes(month);
-            updateEficienciaKPIs(month);
-            updateTablesContent(month);
-            
-            // Actualizar botones
-            document.querySelectorAll('.month-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.month === month);
-            });
-            
-            // Recrear gráficos basados en la pestaña activa
-            const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-            initializeChartsForTab(activeTab);
+  function changeMonth(month) {
+    currentMonth = month;
+    
+    // Actualizar UI
+    updateHeaderStats(month);
+    updateKPIs(month);
+    updateSummaryBoxes(month);
+    updateEficienciaKPIs(month);
+    updateClientesKPIs(month);
+    updateGeograficoKPIs(month);
+    updateMetricasDetalle(month);
+    updateTablesContent(month);
+    
+    // Actualizar botones - ESTA LÍNEA ES CRÍTICA
+    document.querySelectorAll('.month-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.month === month);
+    });
+    
+    // Recrear gráficos basados en la pestaña activa
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab || 'overview';
+    console.log('Cambiando a mes:', month, 'Pestaña activa:', activeTab); // Para debug
+    initializeChartsForTab(activeTab);
+}
+ function initializeChartsForTab(tab) {
+    console.log('Inicializando gráficas para pestaña:', tab); // Para debug
+    
+    // Limpiar timeout anterior si existe
+    if (window.chartTimeout) {
+        clearTimeout(window.chartTimeout);
+    }
+    
+    window.chartTimeout = setTimeout(() => {
+        try {
+            switch(tab) {
+                case 'overview':
+                    createOverviewChart(currentMonth);
+                    break;
+                case 'eficiencia':
+                    createPautaComparativeChart(currentMonth);
+                    createEficienciaSucursalChart(currentMonth);
+                    createCostoPorClienteChart(currentMonth);
+                    break;
+                case 'geografico':
+                    createGeograficoChart(currentMonth);
+                    createPerformanceRegionChart(currentMonth);
+                    createPenetracionChart(currentMonth);
+                    createGuatemalaMap(currentMonth);
+                    break;
+                case 'clientes':
+                    createCanalesChart(currentMonth);
+                    createDistribucionMontosChart(currentMonth);
+                    createEficienciaCanalChart(currentMonth);
+                    break;
+                case 'detalle':
+                    createRankingChart(currentMonth);
+                    break;
+                case 'anual':
+                    createEvolucionDesembolsosChart();
+                    createCasosPorMesChart();
+                    createPerformanceSucursalAnualChart();
+                    createEvolucionCanalesChart();
+                    createDistribucionTrimestralChart();
+                    break;
+                default:
+                    console.warn('Pestaña no reconocida:', tab);
+                    break;
+            }
+            console.log('Gráficas inicializadas exitosamente para:', tab);
+        } catch (error) {
+            console.error('Error in chart initialization:', error);
         }
-
-        function initializeChartsForTab(tab) {
-            setTimeout(() => {
-                try {
-                    switch(tab) {
-                        case 'overview':
-                            createOverviewChart(currentMonth);
-                            break;
-                        case 'eficiencia':
-                            createPautaComparativeChart(currentMonth);
-                            createEficienciaSucursalChart(currentMonth);
-                            createCostoPorClienteChart(currentMonth);
-                            break;
-                        case 'geografico':
-                            createGeograficoChart(currentMonth);
-                            createPerformanceRegionChart(currentMonth);
-                            createPenetracionChart(currentMonth);
-                            break;
-                        case 'clientes':
-                            createCanalesChart(currentMonth);
-                            createDistribucionMontosChart(currentMonth);
-                            createEficienciaCanalChart(currentMonth);
-                            break;
-                        case 'detalle':
-                            createRankingChart(currentMonth);
-                            break;
-                    }
-                } catch (error) {
-                    console.log('Error in chart initialization:', error);
-                }
-            }, 300);
-        }
+    }, 200);
+}
 
         // ========================================
         // EVENT LISTENERS
@@ -1886,8 +2669,19 @@
             });
 
             // Initialize with current month data
-            changeMonth(currentMonth);
-            
+changeMonth(currentMonth);
+
+// FORZAR carga de gráficas al inicio
+setTimeout(() => {
+    const activeTab = document.querySelector('.tab-btn.active')?.dataset?.tab || 'overview';
+    console.log('Inicializando gráficas para:', activeTab); // Para debug
+    initializeChartsForTab(activeTab);
+}, 100);
+            // AGREGAR ESTO para forzar la carga de gráficas:
+setTimeout(() => {
+    initializeChartsForTab('overview');
+}, 500);
+
             // Add entrance animations
             const cards = document.querySelectorAll('.card, .kpi-card');
             cards.forEach((card, index) => {
